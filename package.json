@@ -1,0 +1,18 @@
+{
+  "name": "smtp",
+  "version": "0.0.1",
+  "description": "Simple SMTP server",
+  "scripts": {
+    "serve": "node --watch --watch-path=src/ --env-file=example/.env ./example/server.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "mail",
+    "smtp",
+    "nodejs",
+    "email-server"
+  ],
+  "author": "Carlgo11",
+  "license": "LGPL-3.0-or-later",
+  "type": "module"
+}
