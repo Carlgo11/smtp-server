@@ -2,27 +2,31 @@ import EHLO from './EHLO.js';
 import STARTTLS from './STARTTLS.js';
 import MAIL from './MAIL.js';
 import QUIT from './QUIT.js';
+import DATA from './DATA.js';
 
-export default function handleCommands(eventEmitter, context) {
+export default function handleCommands(eventEmitter) {
   eventEmitter.on('command', (message, session) => {
-    const command = message.trim().split(' ')[0].toLowerCase();
+    const command = message.trim().split(' ')[0].toUpperCase();
     switch (command) {
-      case 'ehlo':
-        EHLO(message, session, context);
+      case 'EHLO':
+        EHLO(message, session);
         break;
-      case 'starttls':
-        STARTTLS(message, session, context);
+      case 'STARTTLS':
+        STARTTLS(message, session);
         break;
-      case 'mail':
-        MAIL(message,session, context);
+      case 'MAIL':
+        MAIL(message, session);
         break;
-      case 'data':
+      case 'RCPT':
         break;
-      case 'quit':
+      case 'DATA':
+        DATA(message, session);
+        break;
+      case 'QUIT':
         QUIT(session);
         break;
       default:
-        session.send(`Command unrecognized ${command}`, 500);
+        session.send(`Command unrecognized ${command}`, 502);
         break;
     }
   });

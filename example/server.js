@@ -1,7 +1,6 @@
 import {startSMTPServer} from '../src/index.js';
 import fs from 'fs';
 
-console.log(process.env.TLS_KEY_PATH);
 const server = startSMTPServer({
   port: 2525, // Custom port
   tlsOptions: {
@@ -10,7 +9,7 @@ const server = startSMTPServer({
     handshakeTimeout: 5000,
     minVersion: 'TLSv1.3',
     maxVersion: 'TLSv1.3',
-    ALPNProtocols: ['http/1.1'],
+    ALPNProtocols: ['h2'],
   },
   onCommand: (message) => {
     console.log(`Custom command handler received message: ${message}`);

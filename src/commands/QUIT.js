@@ -1,4 +1,4 @@
 export default function QUIT(session){
-  session.send('Bye', 250);
+  session.send('BYE', 221);
   session.socket.end();
 }

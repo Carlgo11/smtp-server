@@ -1,7 +1,8 @@
 import tls from 'tls';
 import Logger from './utils/logger.js';
+import context from './ServerContext.js';
 
-export function handleTLSConnection(session, context) {
+export function handleTLSConnection(session) {
   // Create a new TLS socket from the existing socket
   const {tlsOptions,eventEmitter} = context;
 
@@ -16,11 +17,13 @@ export function handleTLSConnection(session, context) {
 
   // Set up event listeners for the TLS socket
   tlsSocket.on('data', (data) => {
-    const message = data.toString().trim();
-    Logger.debug(`C: ${message}`, session.id);
+    if(session.state !== session.states.DATA_READY) {
+      const message = data.toString().trim();
+      Logger.debug(`C: ${message}`, session.id);
 
-    // Emit a generic command event on the secure channel
-    eventEmitter.emit('command', message, session);
+      // Emit a generic command event on the secure channel
+      eventEmitter.emit('command', message, session);
+    }
   });
 
   tlsSocket.on('end', () => {

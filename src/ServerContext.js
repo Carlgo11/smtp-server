@@ -1,15 +1,25 @@
-export default class ServerContext {
-  constructor(options = {}) {
-    this.port = options.port || 2525;
-    this.tlsOptions = options.tlsOptions || {};
-    this.onCommand = options.onCommand || (() => {});
-    this.onConnect = options.onConnect || (() => {});
-    this.eventEmitter = options.eventEmitter || null; // shared event emitter
-    this.onDisconnect = options.onDisconnect || (() => {});
-    this.onSecure = options.onSecure || (() => {});
-    this.onEHLO = options.onEHLO || (() => {});
-    this.onMAIL = options.onMAIL || (() => {});
-    this.onRCPT = options.onRCPT || (() => {});
-    this.onDATA = options.onDATA || (() => {});
+import {hostname} from 'os';
+
+class ServerContext {
+  constructor() {
+    // Initialize default settings
+    this.port = 2525;
+    this.tlsOptions = {};
+    this.greeting = hostname();
+    this.eventEmitter = null;
+    this.onConnect = (session) => {};
+    this.onEHLO = async (message,session) => true;
+    this.onMAILFROM = async (address,session) => true;
+    this.onRCPTTO = async (address,session) => true;
+    this.onSecure = async (tlsInfo,session) => true;
+    this.onDATA = async (message,session) => true;
   }
+
+  // Method to set options, allowing for overrides by the implementing project
+  setOptions(options = {}) {
+    Object.assign(this, options)
+   }
 }
+
+// Export a singleton instance of the context
+export default new ServerContext();

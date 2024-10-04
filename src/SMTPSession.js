@@ -6,8 +6,8 @@ export default class SMTPSession {
   constructor(socket) {
     this.socket = socket;
     this.clientIP = socket.remoteAddress;
-    this.greeting = os.hostname()
-    this.id = crypto.randomBytes(8).toString('hex')
+    this.greeting = os.hostname();
+    this.id = crypto.randomBytes(8).toString('hex');
     this.rDNS = null;
     this.ehlo = null;
     this.mailFrom = null;
@@ -18,35 +18,52 @@ export default class SMTPSession {
     this.states = {
       NEW: 'NEW',         // Just connected
       EHLO_RECEIVED: 'EHLO_RECEIVED', // EHLO completed
-      STARTTLS: 'STARTTLS', // STARTTLS completed
+      STARTTLS: 'STARTTLS',     // STARTTLS completed
       MAIL_FROM: 'MAIL_FROM',   // MAIL FROM received
       RCPT_TO: 'RCPT_TO',       // RCPT TO received
-      DATA_READY: 'DATA_READY', // Ready to receive data
-      QUIT: 'QUIT'        // Client has quit
+      DATA_READY: 'DATA_READY',             // Data received
+      DATA_DONE: 'DATA_DONE',             // Data received
+      QUIT: 'QUIT',              // Client has quit
     };
 
     this.state = this.states.NEW; // Start with the NEW state
   }
 
-  send(message, code){
-    Logger.debug(`S: ${code} ${message}`, this.id);
-    this.socket.write(`${code} ${message}\r\n`);
+  /**
+   *
+   * @param {String|Error} message
+   * @param code {Number|Array}
+   */
+  send(message, code = undefined) {
+    let output = '';
+    if (message instanceof Error) {
+      output = `${message.responseCode} ${message.message}`;
+    } else if (code === undefined) {
+      output = message;
+    } else if (code instanceof Array) {
+
+    } else if (Number.isInteger(code)) {
+      output = `${code} ${message}`;
+    }
+    Logger.debug(`S: ${output}`, this.id);
+    this.socket.write(`${output}\r\n`);
+
   }
 
   // State transition helper
   transitionTo(newState) {
-    Logger.debug(`Session transitioned to ${newState}`,this.id);
+    Logger.debug(`Session transitioned to ${newState}`, this.id);
     this.state = newState;
   }
 
   // State validation helper
   isValidTransition(expectedState) {
-    if(expectedState instanceof Array){
-      for(const state of expectedState){
-        if(this.state === state) return true;
+    if (expectedState instanceof Array) {
+      for (const state of expectedState) {
+        if (this.state === state) return true;
       }
       return false;
-    }else
-    return this.state === expectedState;
+    } else
+      return this.state === expectedState;
   }
 }

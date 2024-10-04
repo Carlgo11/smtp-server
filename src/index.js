@@ -3,20 +3,21 @@ import {EventEmitter} from 'events';
 import SMTPSession from './SMTPSession.js';
 import Logger from './utils/logger.js';
 import handleCommands from './commands/CommandHandler.js';
-import ServerContext from './ServerContext.js';
+import context from './ServerContext.js';
 
 export function startSMTPServer(options = {}) {
    const eventEmitter = new EventEmitter();
   options.eventEmitter = eventEmitter; // add eventEmitter to the options
 
   // Create a shared context for all configurations and handlers
-  const context = new ServerContext(options);
+  context.setOptions(options);
+
   // Create the SMTP server
   const server = net.createServer((socket) => {
-    const session = new SMTPSession(socket, eventEmitter, context.tlsOptions);
+    const session = new SMTPSession(socket, eventEmitter);
 
     // Initialize command handlers
-    handleCommands(eventEmitter, context);
+    handleCommands(eventEmitter);
 
     // Optionally pass connection details to the user-defined handler
     if (typeof context.onConnect === 'function') {
