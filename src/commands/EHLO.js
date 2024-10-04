@@ -1,15 +1,16 @@
 import context from '../ServerContext.js';
 
-export default async function EHLO(message, session) {
+export default async function EHLO(args, session, server) {
 
   if (!session.isValidTransition(['NEW', 'STARTTLS']))
     return session.send('Bad sequence of commands', 503);
 
-  const args = message.split(' ');
-  if (args.length !== 2)
+  if (args.length !== 1)
     return session.send('Syntax error in parameters or arguments', 401);
 
-  const domain = args[1];
+  const domain = args[0];
+
+  server.emit('EHLO', session, domain);
 
   // Wait for external validation
   context.onEHLO(domain, session).then(() => {

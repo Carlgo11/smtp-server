@@ -22,10 +22,17 @@ const server = startSMTPServer({
     console.log(`${session.clientIP} secured`);
   },
   onConnect: (session) => {
-    console.log(session);
     console.log(`New connection established from ${session.clientIP}`);
     // Additional logic for new connections...
   },
 });
+
+server.on('EHLO', (session, domain) => {
+  console.log('session:', session.id, domain)
+})
+
+server.on('MAIL', (session, address) => {
+  console.log('from:',  address);
+})
 
 // Optionally, add more custom handlers or configurations

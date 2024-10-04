@@ -37,6 +37,7 @@ export default async function DATA(message, session) {
 
   // Handle completion of the data message
   async function handleDataComplete(messageData, session) {
+    session.events.emit('DATA', messageData);
     try {
       // Pass the message data to the consumer's onMessageReceived handler
       const result = await context.onDATA(messageData, session);

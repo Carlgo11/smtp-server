@@ -6,18 +6,16 @@ import handleCommands from './commands/CommandHandler.js';
 import context from './ServerContext.js';
 
 export function startSMTPServer(options = {}) {
-   const eventEmitter = new EventEmitter();
-  options.eventEmitter = eventEmitter; // add eventEmitter to the options
 
   // Create a shared context for all configurations and handlers
   context.setOptions(options);
 
   // Create the SMTP server
   const server = net.createServer((socket) => {
-    const session = new SMTPSession(socket, eventEmitter);
+    const session = new SMTPSession(socket);
 
     // Initialize command handlers
-    handleCommands(eventEmitter);
+    handleCommands(server);
 
     // Optionally pass connection details to the user-defined handler
     if (typeof context.onConnect === 'function') {
@@ -33,7 +31,7 @@ export function startSMTPServer(options = {}) {
       Logger.debug(`C: ${message}`, session.id);
 
       // Emit a generic command event
-      eventEmitter.emit('command', message, session);
+      server.emit('command', message, session);
     });
 
     socket.on('end', () => {
@@ -45,7 +43,7 @@ export function startSMTPServer(options = {}) {
       console.error(`Error occurred with ${session.clientIP}: ${err.message}`);
     });
 
-    eventEmitter.on('terminate', () => {
+    server.on('terminate', () => {
       context.onDisconnect(session);
       session.send('Closing connection', 500);
       socket.end();

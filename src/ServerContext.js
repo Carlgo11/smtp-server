@@ -8,10 +8,11 @@ class ServerContext {
     this.greeting = hostname();
     this.eventEmitter = null;
     this.onConnect = (session) => {};
+    this.onDisconnect = (session) => {};
     this.onEHLO = async (message,session) => true;
     this.onMAILFROM = async (address,session) => true;
     this.onRCPTTO = async (address,session) => true;
-    this.onSecure = async (tlsInfo,session) => true;
+    this.onSecure = async (session) => true;
     this.onDATA = async (message,session) => true;
   }
 
