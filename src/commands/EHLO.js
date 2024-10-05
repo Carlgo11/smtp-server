@@ -19,7 +19,7 @@ export default async function EHLO(args, session, server) {
 
     if (session.tls) {
       session.send('250-ENHANCEDSTATUSCODES');
-      session.send('SIZE 35882577', 250);
+      session.send(`SIZE ${context.max_message_size}`, 250);
     } else {
       session.send('STARTTLS', 250);
       session.transitionTo(session.states.EHLO_RECEIVED);

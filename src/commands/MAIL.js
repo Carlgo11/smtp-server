@@ -1,11 +1,12 @@
 import context from '../ServerContext.js';
+
 export default async function MAIL(args, session, server) {
   if (session.state !== session.states.STARTTLS) {
     return session.send('503 Bad sequence of commands', 503);
   }
 
   // Validate command is MAIL FROM:
-  if(args.length !== 1 || !args[0].toUpperCase().startsWith('FROM:')) {
+  if (args.length !== 1 || !args[0].toUpperCase().startsWith('FROM:')) {
     return session.send('Syntax error in parameters or arguments', 501);
   }
 
@@ -22,15 +23,14 @@ export default async function MAIL(args, session, server) {
   server.emit('MAIL', session, sender);
 
   // Wait on external validation
-  if(!await context.onMAILFROM(sender))
-    return session.send('', 501)
+  context.onMAILFROM(sender).then(result => {
+    // Save the sender's address in the session
+    session.mailFrom = sender;
 
-  // Save the sender's address in the session
-  session.mailFrom = sender;
+    // Transition to MAIL_FROM state
+    session.transitionTo(session.states.MAIL_FROM);
 
-  // Transition to MAIL_FROM state
-  session.transitionTo(session.states.MAIL_FROM);
-
-  // Send positive response
-  session.send('OK', 250);
+    // Send positive response
+    session.send('OK', [250, 2, 1, 0]);
+  }).catch(err => err ? session.send(err) : session.send('Bad address', 518));
 }

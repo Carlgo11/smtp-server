@@ -41,7 +41,9 @@ export default class SMTPSession {
     } else if (code === undefined) {
       output = message;
     } else if (code instanceof Array) {
-
+      const basic = code.shift();
+      const enhanced = code.join('.');
+      output = `${basic} ${enhanced} ${message}`;
     } else if (Number.isInteger(code)) {
       output = `${code} ${message}`;
     }

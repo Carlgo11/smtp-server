@@ -6,6 +6,7 @@ class ServerContext {
     this.port = 2525;
     this.tlsOptions = {};
     this.greeting = hostname();
+    this.max_message_size = 10 * 1024 * 1024;
     this.eventEmitter = null;
     this.onConnect = (session) => {};
     this.onDisconnect = (session) => {};
