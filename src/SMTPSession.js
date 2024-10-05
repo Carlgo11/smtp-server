@@ -1,6 +1,7 @@
 import os from 'os';
 import * as crypto from 'node:crypto';
 import Logger from './utils/logger.js';
+import Response from './model/Response.js';
 
 export default class SMTPSession {
   constructor(socket) {
@@ -36,10 +37,12 @@ export default class SMTPSession {
    */
   send(message, code = undefined) {
     let output = '';
-    if (message instanceof Error) {
-      output = `${message.responseCode} ${message.message}`;
-    } else if (code === undefined) {
+    if (code === undefined) {
       output = message;
+    } else if (message instanceof Response) {
+      output = message.toString();
+    } else if (message instanceof Error) {
+      output = `${message.responseCode} ${message.message}`;
     } else if (code instanceof Array) {
       const basic = code.shift();
       const enhanced = code.join('.');

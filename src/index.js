@@ -4,6 +4,7 @@ import SMTPSession from './SMTPSession.js';
 import Logger from './utils/logger.js';
 import handleCommands from './commands/CommandHandler.js';
 import context from './ServerContext.js';
+import _Response from './model/Response.js';
 
 export function startSMTPServer(options = {}) {
 
@@ -57,4 +58,5 @@ export function startSMTPServer(options = {}) {
 
   return server; // Return the server instance for further use
 }
+export const Response = _Response
 

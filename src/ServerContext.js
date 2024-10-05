@@ -6,11 +6,10 @@ class ServerContext {
     this.port = 2525;
     this.tlsOptions = {};
     this.greeting = hostname();
-    this.max_message_size = 10 * 1024 * 1024;
-    this.eventEmitter = null;
+    this.maxMessageSize = 10 * 1024 * 1024;
     this.onConnect = (session) => {};
     this.onDisconnect = (session) => {};
-    this.onEHLO = async (message,session) => true;
+    this.onEHLO = async (domain,session) => true;
     this.onMAILFROM = async (address,session) => true;
     this.onRCPTTO = async (address,session) => true;
     this.onSecure = async (session) => true;

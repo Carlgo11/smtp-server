@@ -21,7 +21,7 @@ export default function handleCommands(server) {
       case 'RCPT':
         break;
       case 'DATA':
-        DATA(args, session, server);
+        DATA(session, server);
         break;
       case 'QUIT':
         QUIT(session);

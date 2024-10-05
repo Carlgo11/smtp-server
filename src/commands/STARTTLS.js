@@ -1,10 +1,11 @@
 import {handleTLSConnection} from '../TLSConnection.js';
 import Logger from '../utils/logger.js';
+import Response from '../model/Response.js';
 
 export default function STARTTLS(session,server) {
   // Ensure that STARTTLS can only be initiated after EHLO
   if (session.state !== session.states.EHLO_RECEIVED) {
-    return session.send(`Bad sequence of commands ${session.state}`, 503);
+    return session.send(new Response(null, 503, [5,5,1]));
   }
 
   // Send response to indicate server is ready to start TLS

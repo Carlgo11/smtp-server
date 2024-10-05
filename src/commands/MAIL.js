@@ -1,13 +1,14 @@
 import context from '../ServerContext.js';
+import Response from '../model/Response.js';
 
 export default async function MAIL(args, session, server) {
   if (session.state !== session.states.STARTTLS) {
-    return session.send('503 Bad sequence of commands', 503);
+    return session.send(new Response(null, 501, [5, 5, 1]));
   }
 
   // Validate command is MAIL FROM:
   if (args.length !== 1 || !args[0].toUpperCase().startsWith('FROM:')) {
-    return session.send('Syntax error in parameters or arguments', 501);
+    return session.send(new Response(null, 501, [5, 5, 2]));
   }
 
   // Parse the `MAIL FROM` command
@@ -15,7 +16,7 @@ export default async function MAIL(args, session, server) {
 
   // Ensure correct command format
   if (!address.startsWith('<') || !address.endsWith('>')) {
-    return session.send('Syntax error in parameters or arguments', 501);
+    return session.send(new Response(null, 501, [5, 5, 2]));
   }
 
   const sender = address.slice(1, -1); // Extract the email address
@@ -31,6 +32,9 @@ export default async function MAIL(args, session, server) {
     session.transitionTo(session.states.MAIL_FROM);
 
     // Send positive response
-    session.send('OK', [250, 2, 1, 0]);
-  }).catch(err => err ? session.send(err) : session.send('Bad address', 518));
+    session.send(new Response(null, 250, [2, 1, 0]));
+  }).catch(err => {
+    if (err instanceof Response) session.send(err);
+    else session.send(new Response(null, 451, [4, 3, 0]));
+  });
 }

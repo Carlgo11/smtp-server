@@ -17,7 +17,7 @@ export function handleTLSConnection(session,server) {
 
   // Set up event listeners for the TLS socket
   tlsSocket.on('data', (data) => {
-    if(session.state == session.states.DATA_READY) {
+    if(session.state === session.states.DATA_READY) {
       server.emit('dataChunk', data, session);
     }else{
       const message = data.toString().trim();

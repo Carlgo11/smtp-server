@@ -1,4 +1,5 @@
 import context from '../ServerContext.js';
+import Response from '../model/Response.js';
 
 /**
  * Handles the SMTP DATA command.
@@ -7,10 +8,10 @@ import context from '../ServerContext.js';
  * @param {SMTPSession} session - The current SMTP session.
  * @param {net.Server} server - The SMTP server instance.
  */
-export default function DATA(message, session, server) {
+export default function DATA(session, server) {
   // Constants
   const DATA_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
-  const MAX_MESSAGE_SIZE = context.max_message_size; // 10 MB
+  const MAX_MESSAGE_SIZE = context.maxMessageSize; // 10 MB
   let dataBuffer = '';
   let dataTimeout;
 
@@ -33,7 +34,9 @@ export default function DATA(message, session, server) {
     server.removeListener('dataChunk', onDataChunk);
 
     // Transition to DATA_DONE state after processing is complete
-    session.transitionTo(result ? session.states.DATA_DONE : session.states.RCPT_TO);
+    session.transitionTo(
+        result ? session.states.DATA_DONE:session.states.RCPT_TO,
+    );
   };
 
   /**
@@ -42,14 +45,17 @@ export default function DATA(message, session, server) {
    * @param {string} messageData - The complete message data received.
    */
   const handleDataComplete = (messageData) => {
-      // Pass the message data to the consumer's onDATA handler
-      context.onDATA(messageData, session).then(result => {
-        session.send('Message accepted', [250, 2, 6, 0]);
-        cleanup(true);
-      }).catch((result) => {
-        session.send(`${result || 'Message rejected'}`, [550, 5, 1, 0]);
-        cleanup(false);
-      })
+    // Pass the message data to the consumer's onDATA handler
+    context.onDATA(messageData, session).then((result) => {
+      if (result instanceof Response) session.send(result);
+      else session.send('Message accepted', [250, 2, 6, 0]);
+
+      cleanup(true);
+    }).catch((result) => {
+      if (result instanceof Response) session.send(result);
+      else session.send(`${result || 'Message rejected'}`, [550, 5, 1, 0]);
+      cleanup(false);
+    });
   };
 
   /**
@@ -63,7 +69,9 @@ export default function DATA(message, session, server) {
 
     // Check for maximum message size
     if (dataBuffer.length > MAX_MESSAGE_SIZE) {
-      session.send('Message size exceeds fixed maximum message size', [552, 5, 3, 4]);
+      session.send(
+          'Message size exceeds fixed maximum message size',
+          [552, 5, 3, 4]);
       cleanup(false);
       return;
     }
