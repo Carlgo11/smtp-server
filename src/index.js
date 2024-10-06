@@ -1,10 +1,24 @@
 import net from 'net';
-import {EventEmitter} from 'events';
 import SMTPSession from './SMTPSession.js';
 import Logger from './utils/logger.js';
-import handleCommands from './commands/CommandHandler.js';
+import {registerCommand, handleCommand} from './commands/CommandHandler.js';
 import context from './ServerContext.js';
 import _Response from './model/Response.js';
+
+// Load commands
+import EHLO from './commands/EHLO.js';
+import STARTTLS from './commands/STARTTLS.js';
+import QUIT from './commands/QUIT.js';
+import MAIL from './commands/MAIL.js';
+import RCPT from './commands/RCPT.js';
+import DATA from './commands/DATA.js';
+
+registerCommand('EHLO', EHLO);
+registerCommand('STARTTLS', STARTTLS);
+registerCommand('MAIL', MAIL);
+registerCommand('RCPT', RCPT);
+registerCommand('DATA', DATA);
+registerCommand('QUIT', QUIT);
 
 export function startSMTPServer(options = {}) {
 
@@ -14,9 +28,6 @@ export function startSMTPServer(options = {}) {
   // Create the SMTP server
   const server = net.createServer((socket) => {
     const session = new SMTPSession(socket);
-
-    // Initialize command handlers
-    handleCommands(server);
 
     context.onConnect(session);
 
@@ -30,8 +41,7 @@ export function startSMTPServer(options = {}) {
       const message = data.toString().trim();
       Logger.debug(`C: ${message}`, session.id);
 
-      // Emit a generic command event
-      server.emit('command', message, session);
+      handleCommand(message, session, server);
     });
 
     socket.on('end', () => {
@@ -44,15 +54,22 @@ export function startSMTPServer(options = {}) {
     });
 
     server.on('terminate', () => {
-      context.onDisconnect(session);
-      session.send('Closing connection', 500);
-      socket.end();
+      terminate();
     });
+
+    const terminate = () => {
+      server.close();
+      context.onDisconnect(session);
+      socket.write('421 4.4.2 Server shutting down\r\n', () => {
+        socket.end();
+      });
+    }
+
+    process.on('SIGINT', () => server.emit('terminate'));
+    process.on('SIGTERM', () => server.emit('terminate'));
   });
-
-
 
   return server; // Return the server instance for further use
 }
-export const Response = _Response
 
+export const Response = _Response

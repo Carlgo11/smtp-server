@@ -3,7 +3,10 @@ import Response from '../model/Response.js';
 
 export default async function MAIL(args, session, server) {
   if (session.state !== session.states.STARTTLS) {
-    return session.send(new Response(null, 501, [5, 5, 1]));
+    const res = session.tls ?
+        new Response(null, 501, [5, 5, 1]):
+        new Response('Must issue a STARTTLS command first.', 530, [5, 7, 0]);
+    return session.send(res);
   }
 
   // Validate command is MAIL FROM:

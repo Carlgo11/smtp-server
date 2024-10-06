@@ -1,8 +1,9 @@
 import tls from 'tls';
 import Logger from './utils/logger.js';
 import context from './ServerContext.js';
+import {handleCommand} from './commands/CommandHandler.js';
 
-export function handleTLSConnection(session,server) {
+export function handleTLSConnection(session, server) {
   // Create a new TLS socket from the existing socket
   const {tlsOptions} = context;
 
@@ -17,14 +18,13 @@ export function handleTLSConnection(session,server) {
 
   // Set up event listeners for the TLS socket
   tlsSocket.on('data', (data) => {
-    if(session.state === session.states.DATA_READY) {
+    if (session.state === session.states.DATA_READY) {
       server.emit('dataChunk', data, session);
-    }else{
+    } else {
       const message = data.toString().trim();
       Logger.debug(`C: ${message}`, session.id);
 
-      // Emit a generic command event on the secure channel
-      server.emit('command', message, session);
+      handleCommand(message, session, server);
     }
   });
 
@@ -67,6 +67,15 @@ export function handleTLSConnection(session,server) {
     server.emit('secure');
     // context.onSecure(session).then(r => r);
   });
+
+  tlsSocket.on('terminate', () => {
+    context.onDisconnect(session);
+    session.send('Server shutting down', [421, 4, 4, 2]);
+    tlsSocket.end();
+  });
+
+  process.on('SIGINT', () => tlsSocket.emit('terminate'));
+  process.on('SIGTERM', () => tlsSocket.emit('terminate'));
 
   // Transition to TLS state
   session.transitionTo(session.states.STARTTLS);

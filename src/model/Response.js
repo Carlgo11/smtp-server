@@ -26,9 +26,9 @@ export default class Response {
     this.enhancedStatus = enhancedStatus;
   }
 
-  toString() {
+  toString(eStatusCodes = true) {
     const eStatus = this.enhancedStatus.join('.');
-    return `${this.basicStatus} ${eStatus} ${this.message}`;
+    return `${this.basicStatus}${eStatusCodes ? ` ${eStatus}`: ''} ${this.message}`;
   }
 
   fetchMessage(enhancedStatus) {

@@ -4,11 +4,11 @@ import Response from '../model/Response.js';
 /**
  * Handles the SMTP DATA command.
  *
- * @param {string} message - The received command message.
+ * @param _
  * @param {SMTPSession} session - The current SMTP session.
  * @param {net.Server} server - The SMTP server instance.
  */
-export default function DATA(session, server) {
+export default function DATA(_, session, server) {
   // Constants
   const DATA_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
   const MAX_MESSAGE_SIZE = context.maxMessageSize; // 10 MB
@@ -45,6 +45,7 @@ export default function DATA(session, server) {
    * @param {string} messageData - The complete message data received.
    */
   const handleDataComplete = (messageData) => {
+    server.emit('MESSAGE', session, messageData);
     // Pass the message data to the consumer's onDATA handler
     context.onDATA(messageData, session).then((result) => {
       if (result instanceof Response) session.send(result);

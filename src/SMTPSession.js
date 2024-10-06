@@ -10,7 +10,7 @@ export default class SMTPSession {
     this.clientIP = socket.remoteAddress;
     this.greeting = os.hostname();
     this.id = crypto.randomBytes(8).toString('hex');
-    this.rDNS = null
+    this.rDNS = null;
     this.ehlo = null;
     this.mailFrom = null;
     this.rcptTo = [];
@@ -40,12 +40,12 @@ export default class SMTPSession {
    */
   send(message, code = undefined) {
     let output = '';
-    if (code === undefined) {
-      output = message;
-    } else if (message instanceof Response) {
-      output = message.toString();
+    if (message instanceof Response) {
+      output = message.toString(this.tls);
     } else if (message instanceof Error) {
       output = `${message.responseCode} ${message.message}`;
+    } else if (code === undefined) {
+      output = message;
     } else if (code instanceof Array) {
       const basic = code.shift();
       const enhanced = code.join('.');
