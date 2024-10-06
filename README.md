@@ -54,7 +54,6 @@ import SMTPServer from '@carlgo11/smtp-server';
 
 // Create server instance
 const server = new SMTPServer({
-  port: 25,
   tlsOptions: {
     key: 'key.pem',
     cert: 'cert.pem',
@@ -71,6 +70,11 @@ server.onEHLO((address, session) => {
 });
 
 // Other hooks or event handlers...
+
+//Start server on port 25
+server.listen(25, null,() => {
+   Logger.info(`SMTP Server listening on ${context.port}`);
+});
 ```
 
 ## **Hooks and Event Flow**
@@ -101,10 +105,9 @@ Here's a basic example of handling an incoming email:
 server.onMAILFROM((address, session) => {
   // Validate the sender's address
   if (address.includes('blacklisted.com')) {
-    session.send('Sender address rejected', [550, 5, 7, 1]);
-    return false;
+    throw new Response('Sender address rejected', 550, [5, 7, 1]);
   }
-  session.send('OK', [250, 2, 1, 0]);
+  // You can return true if you want the server to send a default message.
   return true;
 });
 
@@ -112,11 +115,10 @@ server.onRCPTTO(async (address, session) => {
   // Check if recipient is allowed
    const allowed = await isAllowedRecipient(address);
   if (!allowed) {
-    const error = new Error('Recipient address rejected');
-    error.responseCode = 550;
-    throw error;
+    throw new Repsonse('Recipient does not exist', 550, [5, 1, 1]);
   }
-  return true;
+  // If you return a Response, the default message is overwritten
+  return new Response('${address} OK', 250, [2, 1, 5]) 
 });
 ```
 

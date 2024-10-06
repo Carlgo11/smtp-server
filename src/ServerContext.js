@@ -3,10 +3,10 @@ import {hostname} from 'os';
 class ServerContext {
   constructor() {
     // Initialize default settings
-    this.port = 2525;
     this.tlsOptions = {};
     this.greeting = hostname();
     this.maxMessageSize = 10 * 1024 * 1024;
+    this.logLevel = 'INFO';
     this.onConnect = (session) => {};
     this.onDisconnect = (session) => {};
     this.onEHLO = async (domain,session) => true;

@@ -2,6 +2,7 @@ import os from 'os';
 import * as crypto from 'node:crypto';
 import Logger from './utils/logger.js';
 import Response from './model/Response.js';
+import * as dns from 'node:dns';
 
 export default class SMTPSession {
   constructor(socket) {
@@ -9,11 +10,13 @@ export default class SMTPSession {
     this.clientIP = socket.remoteAddress;
     this.greeting = os.hostname();
     this.id = crypto.randomBytes(8).toString('hex');
-    this.rDNS = null;
+    this.rDNS = null
     this.ehlo = null;
     this.mailFrom = null;
     this.rcptTo = [];
     this.tls = false; // TLS session info placeholder
+
+    dns.reverse(socket.remoteAddress, (_, r) => this.rDNS = r);
 
     // Define session states
     this.states = {

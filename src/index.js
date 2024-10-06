@@ -18,10 +18,9 @@ export function startSMTPServer(options = {}) {
     // Initialize command handlers
     handleCommands(server);
 
-    // Optionally pass connection details to the user-defined handler
-    if (typeof context.onConnect === 'function') {
-      context.onConnect(session);
-    }
+    context.onConnect(session);
+
+    Logger.info(`${session.rDNS || session.clientIP}:${socket.remotePort} connected over ${socket.remoteFamily}`, session.id);
 
     // Greet the client
     session.send(`${session.greeting} ESMTP`, 220);
@@ -51,10 +50,7 @@ export function startSMTPServer(options = {}) {
     });
   });
 
-  // Start the server
-  server.listen(context.port, () => {
-    Logger.info(`SMTP Server listening on ${context.port}`);
-  });
+
 
   return server; // Return the server instance for further use
 }

@@ -1,3 +1,5 @@
+import context from '../ServerContext.js';
+
 const levels = {
   DEBUG: 'DEBUG',
   INFO: 'INFO',
@@ -75,6 +77,6 @@ class Logger {
 }
 
 // Singleton logger instance with default level INFO
-const logger = new Logger();
+const logger = new Logger(context.logLevel);
 
 export default logger;
