@@ -1,4 +1,4 @@
-import context from '../ServerContext.js';
+import context from '../core/ServerContext.js';
 
 const levels = {
   DEBUG: 'DEBUG',
@@ -16,7 +16,7 @@ const colors = {
 };
 
 class Logger {
-  constructor(level = 'DEBUG') {
+  constructor(level) {
     this.level = level;
   }
 

@@ -1,9 +1,10 @@
 import tls from 'tls';
-import Logger from './utils/logger.js';
+import Logger from '../utils/Logger.js';
 import context from './ServerContext.js';
-import {handleCommand} from './commands/CommandHandler.js';
+import events from './Event.js';
+import {handleCommand} from '../commands/CommandHandler.js';
 
-export function handleTLSConnection(session, server) {
+export function handleTLSConnection(session) {
   // Create a new TLS socket from the existing socket
   const {tlsOptions} = context;
 
@@ -19,18 +20,18 @@ export function handleTLSConnection(session, server) {
   // Set up event listeners for the TLS socket
   tlsSocket.on('data', (data) => {
     if (session.state === session.states.DATA_READY) {
-      server.emit('dataChunk', data, session);
+      events.emit('DATA', data, session);
     } else {
       const message = data.toString().trim();
       Logger.debug(`C: ${message}`, session.id);
 
-      handleCommand(message, session, server);
+      handleCommand(message, session);
     }
   });
 
   tlsSocket.on('end', () => {
     context.onDisconnect(session);
-    server.emit('disconnect');
+    events.emit('DISCONNECT', session);
     Logger.info('Client disconnected', session.id);
   });
 
@@ -64,7 +65,7 @@ export function handleTLSConnection(session, server) {
     Logger.info(
         `Connection upgraded to ${session.tls.version} (${session.tls.cipher})`,
         session.id);
-    server.emit('secure');
+    events.emit('SECURE');
     // context.onSecure(session).then(r => r);
   });
 

@@ -1,9 +1,9 @@
 {
   "name": "@carlgo11/smtp-server",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Simple lightweight SMTP server written in Node.js",
+  "main": "src/core/SMTPServer.js",
   "scripts": {
-    "serve": "node --watch --watch-path=src/ --env-file=example/.env ./example/server.js",
     "test": "node --test"
   },
   "repository": {
@@ -18,5 +18,9 @@
   ],
   "author": "Carlgo11",
   "license": "GPL-3.0",
-  "type": "module"
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/Carlgo11/smtp-server/issues"
+  },
+  "homepage": "https://github.com/Carlgo11/smtp-server#readme"
 }

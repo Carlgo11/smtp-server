@@ -1,11 +1,12 @@
-import context from '../ServerContext.js';
-import Response from '../model/Response.js';
+import context from '../core/ServerContext.js';
+import Response from '../models/Response.js';
+import events from '../core/Event.js';
 
 /**
  * Handles the SMTP DATA command.
  *
  * @param _
- * @param {SMTPSession} session - The current SMTP session.
+ * @param {Session} session - The current SMTP session.
  * @param {net.Server} server - The SMTP server instance.
  */
 export default function DATA(_, session, server) {
@@ -31,7 +32,7 @@ export default function DATA(_, session, server) {
    */
   const cleanup = (result) => {
     clearTimeout(dataTimeout);
-    server.removeListener('dataChunk', onDataChunk);
+    events.removeListener('DATA', onDataChunk);
 
     // Transition to DATA_DONE state after processing is complete
     session.transitionTo(
@@ -45,7 +46,6 @@ export default function DATA(_, session, server) {
    * @param {string} messageData - The complete message data received.
    */
   const handleDataComplete = (messageData) => {
-    server.emit('MESSAGE', session, messageData);
     // Pass the message data to the consumer's onDATA handler
     context.onDATA(messageData, session).then((result) => {
       if (result instanceof Response) session.send(result);
@@ -91,10 +91,8 @@ export default function DATA(_, session, server) {
   };
 
   // Ensure the state allows the transition to DATA
-  if (session.state !== session.states.RCPT_TO) {
-    session.send('Bad sequence of commands', [503, 5, 5, 1]);
-    return;
-  }
+  if (session.state !== session.states.RCPT_TO)
+    return session.send('Bad sequence of commands', [503, 5, 5, 1]);
 
   // Transition to DATA_READY state and prompt client to start sending data
   session.transitionTo(session.states.DATA_READY);
@@ -104,5 +102,5 @@ export default function DATA(_, session, server) {
   resetTimeout();
 
   // Attach listener for 'dataChunk' event
-  server.on('dataChunk', onDataChunk);
+  events.on('DATA', onDataChunk);
 }

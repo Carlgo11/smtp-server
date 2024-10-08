@@ -1,13 +1,14 @@
 import os from 'os';
 import * as crypto from 'node:crypto';
-import Logger from './utils/logger.js';
-import Response from './model/Response.js';
-import * as dns from 'node:dns';
+import Logger from '../utils/Logger.js';
+import Response from './Response.js';
 
-export default class SMTPSession {
+export default class Session {
   constructor(socket) {
     this.socket = socket;
-    this.clientIP = socket.remoteAddress;
+    this.clientIP = socket.remoteAddress.startsWith('::ffff:') ?
+        socket.remoteAddress.slice(7):
+        socket.remoteAddress;
     this.greeting = os.hostname();
     this.id = crypto.randomBytes(8).toString('hex');
     this.rDNS = null;
@@ -16,18 +17,16 @@ export default class SMTPSession {
     this.rcptTo = [];
     this.tls = false; // TLS session info placeholder
 
-    dns.reverse(socket.remoteAddress, (_, r) => this.rDNS = r);
-
     // Define session states
     this.states = {
-      NEW: 'NEW',         // Just connected
+      NEW: 'NEW',                     // Just connected
       EHLO_RECEIVED: 'EHLO_RECEIVED', // EHLO completed
-      STARTTLS: 'STARTTLS',     // STARTTLS completed
-      MAIL_FROM: 'MAIL_FROM',   // MAIL FROM received
-      RCPT_TO: 'RCPT_TO',       // RCPT TO received
-      DATA_READY: 'DATA_READY',             // Data received
-      DATA_DONE: 'DATA_DONE',             // Data received
-      QUIT: 'QUIT',              // Client has quit
+      STARTTLS: 'STARTTLS',           // STARTTLS completed
+      MAIL_FROM: 'MAIL_FROM',         // MAIL FROM received
+      RCPT_TO: 'RCPT_TO',             // RCPT TO received
+      DATA_READY: 'DATA_READY',       // Data received
+      DATA_DONE: 'DATA_DONE',         // Data received
+      QUIT: 'QUIT',                   // Client has quit
     };
 
     this.state = this.states.NEW; // Start with the NEW state
