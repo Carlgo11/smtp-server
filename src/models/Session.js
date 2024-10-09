@@ -13,6 +13,7 @@ export default class Session {
     this.id = crypto.randomBytes(8).toString('hex');
     this.rDNS = null;
     this.ehlo = null;
+    this.unknownCommands = 0;
     this.mailFrom = null;
     this.rcptTo = [];
     this.tls = false; // TLS session info placeholder

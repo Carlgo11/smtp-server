@@ -1,6 +1,7 @@
 import context from '../core/ServerContext.js';
 import events from '../core/Event.js';
 import Response from '../models/Response.js';
+import isValidEHLO from '../utils/ValidEHLO.js';
 
 export default function EHLO(args, session) {
 
@@ -11,6 +12,9 @@ export default function EHLO(args, session) {
     return session.send(new Response(null, 501, [5, 5, 2]));
 
   const domain = args[0];
+
+  if(!isValidEHLO(domain))
+    return session.send(new Response(null, 501, [5, 5, 2]));
 
   events.emit('EHLO', session, domain);
 

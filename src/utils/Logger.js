@@ -38,7 +38,8 @@ class Logger {
     const time = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     const session = sessionID ? ` <${sessionID}> ` : ' ';
 
-    return `${colors[level]}[${level}]${colors.RESET} [${time}]${session}${message}`;
+
+    return `${colors[level]}[${level}]${colors.RESET} ${' '.repeat(5 - level.length)}[${time}]${session}${message}`;
   }
 
   log(level, message, sessionID) {

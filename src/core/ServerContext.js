@@ -7,6 +7,7 @@ class ServerContext {
     this.greeting = hostname();
     this.maxMessageSize = 10 * 1024 * 1024;
     this.logLevel = 'INFO';
+    this.maxUnknownCommands = 3;
     // Default hooks
     this.onConnect = () => {};
     this.onDisconnect = () => {};
