@@ -40,7 +40,7 @@ export function startSMTPServer(options = {}) {
     Logger.info(`${session.clientIP} connected ${rDNS}`, session.id);
 
     events.emit('CONNECT', session);
-    context.onConnect(session);
+    await context.onConnect(session);
 
     // Greet the client
     session.send(`${session.greeting} ESMTP`, 220);

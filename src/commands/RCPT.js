@@ -35,5 +35,5 @@ export default function RCPT(args, session) {
         new Response(`Recipient <${recipient}> ok`, 250, [2, 1, 5]));
   }).catch(err => session.send(err instanceof Response ?
       err:
-      new Response(null, 451, [4, 3, 0])));
+      new Response(null, 451, [4, 1, 1])));
 }

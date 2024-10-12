@@ -9,7 +9,7 @@ class ServerContext {
     this.logLevel = 'INFO';
     this.maxUnknownCommands = 3;
     // Default hooks
-    this.onConnect = () => {};
+    this.onConnect = async () => {};
     this.onDisconnect = () => {};
     this.onEHLO = async () => true;
     this.onMAILFROM = async () => true;

@@ -1,4 +1,5 @@
 const statuses = {
+  '4.1.1': 'Bad destination mailbox address',
   '4.3.0': 'Requested action aborted: local error in processing',
   '5.3.0': 'Transaction failed: internal server error',
   '2.0.0': 'OK',
