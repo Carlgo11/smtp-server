@@ -8,6 +8,7 @@ class ServerContext {
     this.maxMessageSize = 10 * 1024 * 1024;
     this.logLevel = 'INFO';
     this.maxUnknownCommands = 3;
+    this.timeout = 60 * 1000;
     // Default hooks
     this.onConnect = async () => {};
     this.onDisconnect = () => {};

@@ -25,7 +25,10 @@ export function handleTLSConnection(session) {
       const message = data.toString().trim();
       Logger.debug(`C: ${message}`, session.id);
 
-      handleCommand(message, session);
+      if (data.length > 512)
+        session.send(new Response('Line too long', 500, [5, 5, 2]));
+      else
+        handleCommand(message, session);
     }
   });
 
@@ -63,10 +66,10 @@ export function handleTLSConnection(session) {
     };
 
     Logger.info(
-        `Connection upgraded to ${session.tls.version} (${session.tls.cipher})`,
+        `Connection upgraded to ${tlsSocket.getProtocol()} (${tlsSocket.getCipher().standardName})`,
         session.id);
     events.emit('SECURE');
-    // context.onSecure(session).then(r => r);
+    context.onSecure(session).then(r => r);
   });
 
   tlsSocket.on('terminate', () => {

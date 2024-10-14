@@ -35,7 +35,7 @@ export default class Session {
 
   /**
    *
-   * @param {String|Error} message
+   * @param {String|Error|Response} message
    * @param code {Number|Array}
    */
   send(message, code = undefined) {

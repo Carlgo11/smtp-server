@@ -31,6 +31,7 @@ export function startSMTPServer(options = {}) {
   // Create the SMTP server
   const server = net.createServer(async (socket) => {
     const session = new Session(socket);
+    socket.setTimeout(context.timeout);
 
     // Add session to active sessions
     activeSessions.add(session);
@@ -49,7 +50,11 @@ export function startSMTPServer(options = {}) {
     socket.on('data', (data) => {
       const message = data.toString().trim();
       Logger.debug(`C: ${message}`, session.id);
-      handleCommand(message, session);
+
+      if (data.length > 512)
+        session.send(new Response('Line too long', 500, [5, 5, 2]));
+      else
+        handleCommand(message, session);
     });
 
     socket.on('end', () => {

@@ -13,8 +13,8 @@ export function clearCommands() {
 }
 
 export function handleCommand(message, session) {
-  const command = message.trim().split(' ')[0].toUpperCase();
-  const args = message.substring(command.length).trim().split(' ');
+  const command = message.split(' ')[0].toUpperCase();
+  const args = message.substring(command.length).split(' ');
   const handler = commandHandlers[command];
 
   if (handler) {
