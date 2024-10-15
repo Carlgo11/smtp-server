@@ -13,24 +13,70 @@ export function handleTLSConnection(session) {
     ...tlsOptions,
   });
 
-  tlsSocket.once('connect', () => {
-    console.log('TLS socket connect event triggered.');
-  });
+  let commandBuffer = '';
+  const commandQueue = [];
+  let processing = false;
 
-  // Set up event listeners for the TLS socket
-  tlsSocket.on('data', (data) => {
-    if (session.state === session.states.DATA_READY) {
+  // Handle incoming data from the client
+  tlsSocket.on('data', async (data) => {
+    // If in DATA_READY state, emit the data as message body content
+    if (session.state === session.states.DATA_READY)
       events.emit('DATA', data, session);
-    } else {
-      const message = data.toString().trim();
-      Logger.debug(`C: ${message}`, session.id);
+    else {
+      // Accumulate data in the buffer for command processing
+      commandBuffer += data.toString();
 
-      if (data.length > 512)
-        session.send(new Response('Line too long', 500, [5, 5, 2]));
-      else
-        handleCommand(message, session);
+      // Split buffer into complete commands by CRLF
+      const lines = commandBuffer.split('\r\n');
+      commandBuffer = lines.pop(); // Store any incomplete command back in the buffer
+
+      // Add complete commands to the queue
+      commandQueue.push(...lines);
+
+      // Process the command queue
+      await processCommandQueue();
     }
   });
+
+  // Process commands sequentially from the command queue
+  async function processCommandQueue() {
+    if (processing) return;  // Exit if another command is being processed
+    processing = true;        // Mark processing state
+
+    while (commandQueue.length > 0) {
+      const command = commandQueue.shift().trim(); // Dequeue the next command
+
+      // Skip empty lines (possible with consecutive CRLF)
+      if (command.length === 0)
+        continue;
+
+      Logger.debug(`C: ${command}`, session.id);
+
+      // Enforce the maximum command line length (RFC 5321 Section 4.5.3.1.5)
+      if (command.length > 512) {
+        session.send(new Response('Line too long', 500, [5, 5, 2]));
+        break;
+      }
+
+      try {
+        // Handle the command and wait for it to finish
+        await handleCommand(command, session);
+
+        // After handleCommand, check if the state has changed to DATA_READY
+        if (session.state === session.states.DATA_READY) {
+          // Once in DATA_READY state, stop processing commands
+          // The next data chunks will be emitted to the parser
+          break;
+        }
+      } catch (err) {
+        Logger.error(`Command processing error: ${err.message}`, session.id);
+        session.send(new Response('Internal server error', 451, [4, 0, 0]));
+        break;
+      }
+    }
+
+    processing = false;
+  }
 
   tlsSocket.on('end', () => {
     context.onDisconnect(session);

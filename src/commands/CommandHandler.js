@@ -12,13 +12,12 @@ export function clearCommands() {
   commandHandlers = {};
 }
 
-export function handleCommand(message, session) {
+export async function handleCommand(message, session) {
   const command = message.split(' ')[0].toUpperCase();
-  const args = message.substring(command.length).split(' ');
+  const args = message.substring(command.length + 1).split(' ');
   const handler = commandHandlers[command];
-
   if (handler) {
-    handler(args, session);
+    await handler(args, session)
   } else {
     session.unknownCommands += 1;
     if (session.unknownCommands < context.maxUnknownCommands) {

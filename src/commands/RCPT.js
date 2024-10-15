@@ -2,7 +2,7 @@ import context from '../core/ServerContext.js';
 import Response from '../models/Response.js';
 import events from '../core/Event.js';
 
-export default function RCPT(args, session) {
+export default async function RCPT(args, session) {
   if (session.state !== session.states.MAIL_FROM)
     return session.send(new Response(null, 501, [5, 5, 1]));
 
@@ -22,7 +22,7 @@ export default function RCPT(args, session) {
 
   events.emit('RCPT', session, recipient);
 
-  context.onRCPTTO(recipient, session).then((result) => {
+  return context.onRCPTTO(recipient, session).then((result) => {
     // Save the recipient's address in the session
     session.rcptTo.push(recipient);
 

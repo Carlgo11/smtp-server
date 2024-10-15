@@ -7,9 +7,8 @@ import events from '../core/Event.js';
  *
  * @param _
  * @param {Session} session - The current SMTP session.
- * @param {net.Server} server - The SMTP server instance.
  */
-export default function DATA(_, session, server) {
+export default async function DATA(_, session) {
   // Constants
   const DATA_TIMEOUT = 5 * 60 * 1000; // 5 minutes in milliseconds
   const MAX_MESSAGE_SIZE = context.maxMessageSize; // 10 MB

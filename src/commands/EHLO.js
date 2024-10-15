@@ -28,6 +28,7 @@ export default function EHLO(args, session) {
 
     if (session.tls) {
       session.send('250-ENHANCEDSTATUSCODES');
+      session.send('250-PIPELINING');
       session.send(`SIZE ${context.maxMessageSize}`, 250);
     } else {
       session.send('STARTTLS', 250);
