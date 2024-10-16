@@ -13,7 +13,7 @@ export default function EHLO(args, session) {
 
   const domain = args[0];
 
-  if(!isValidEHLO(domain))
+  if (!isValidEHLO(domain))
     return session.send(new Response(null, 501, [5, 5, 2]));
 
   events.emit('EHLO', session, domain);
@@ -25,10 +25,11 @@ export default function EHLO(args, session) {
 
     session.ehlo = domain;
     session.send(`250-${session.greeting} Hello, ${domain}`);
+    const {extensions} = context;
 
     if (session.tls) {
-      session.send('250-ENHANCEDSTATUSCODES');
-      session.send('250-PIPELINING');
+      extensions.forEach(
+          (extension) => session.send(`250-${extension.toUpperCase()}`));
       session.send(`SIZE ${context.maxMessageSize}`, 250);
     } else {
       session.send('STARTTLS', 250);

@@ -12,6 +12,7 @@ export default class Session {
     this.greeting = os.hostname();
     this.id = crypto.randomBytes(8).toString('hex');
     this.rDNS = null;
+    this.utf8 = false;
     this.ehlo = null;
     this.unknownCommands = 0;
     this.mailFrom = null;

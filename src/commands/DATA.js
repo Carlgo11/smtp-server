@@ -23,6 +23,7 @@ export default async function DATA(_, session) {
     dataTimeout = setTimeout(() => {
       session.send('Requested action aborted: timeout', [451, 4, 4, 2]);
       cleanup(false);
+      session.socket.end();
     }, DATA_TIMEOUT);
   };
 
@@ -65,7 +66,7 @@ export default async function DATA(_, session) {
    */
   const onDataChunk = (chunk) => {
     resetTimeout();
-    dataBuffer += chunk.toString();
+    dataBuffer += chunk.toString(session.utf8 ? 'utf-8' : 'ascii');
 
     // Check for maximum message size
     if (dataBuffer.length > MAX_MESSAGE_SIZE) {

@@ -9,7 +9,7 @@ export default async function MAIL(args, session) {
         new Response('Must issue a STARTTLS command first.', 530, [5, 7, 0]));
 
   // Validate command is MAIL FROM:
-  if (args.length !== 1 || !args[0].toUpperCase().startsWith('FROM:'))
+  if (!args[0].toUpperCase().startsWith('FROM:'))
     return session.send(new Response(null, 501, [5, 5, 2]));
 
   // Parse the `MAIL FROM` command
@@ -24,8 +24,10 @@ export default async function MAIL(args, session) {
 
   events.emit('MAIL', session, sender);
 
+  const [_, ...extensions] = args;
+
   // Wait on external validation
-  context.onMAILFROM(sender, session).then(result => {
+  context.onMAILFROM(sender, session, extensions).then(result => {
 
     // Save the sender's address in the session
     session.mailFrom = sender;

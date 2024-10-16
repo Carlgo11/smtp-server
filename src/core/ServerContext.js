@@ -9,6 +9,7 @@ class ServerContext {
     this.logLevel = 'INFO';
     this.maxUnknownCommands = 3;
     this.timeout = 60 * 1000;
+    this.extensions = ['ENHANCEDSTATUSCODES', 'PIPELINING'];
     // Default hooks
     this.onConnect = async () => {};
     this.onDisconnect = () => {};
