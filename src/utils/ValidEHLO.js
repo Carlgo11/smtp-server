@@ -10,7 +10,7 @@ export default function isValidEHLO(ehloValue) {
   // Check if it's an IP literal enclosed in square brackets
   if (ehloValue.startsWith('[') && ehloValue.endsWith(']')) {
     const ip = ehloValue.slice(1, -1); // Remove the brackets
-    return isIPv4(ip) || isIPv6(ip);   // Check if it's a valid IPv4 or IPv6
+    return isIPv4(ip) || isIPv6(ip); // Check if it's a valid IPv4 or IPv6
   }
 
   // Check if it's a valid domain
@@ -20,7 +20,10 @@ export default function isValidEHLO(ehloValue) {
   if (domainRegex.test(ehloValue)) {
     const labels = ehloValue.split('.');
     // Ensure no label starts or ends with a hyphen and no label is longer than 63 characters
-    return labels.every(label => !label.startsWith('-') && !label.endsWith('-') && label.length <= 63);
+    return labels.every(
+      (label) =>
+        !label.startsWith('-') && !label.endsWith('-') && label.length <= 63
+    );
   }
 
   // If it's neither a valid domain nor a valid IP literal

@@ -22,18 +22,25 @@ export default async function RCPT(args, session) {
 
   events.emit('RCPT', session, recipient);
 
-  return context.onRCPTTO(recipient, session).then((result) => {
-    // Save the recipient's address in the session
-    session.rcptTo.push(recipient);
+  return context
+    .onRCPTTO(recipient, session)
+    .then((result) => {
+      // Save the recipient's address in the session
+      session.rcptTo.push(recipient);
 
-    // Transition to RCPT_TO state
-    session.transitionTo(session.states.RCPT_TO);
+      // Transition to RCPT_TO state
+      session.transitionTo(session.states.RCPT_TO);
 
-    // Send positive response
-    session.send(result instanceof Response ?
-        result:
-        new Response(`Recipient <${recipient}> ok`, 250, [2, 1, 5]));
-  }).catch(err => session.send(err instanceof Response ?
-      err:
-      new Response(null, 451, [4, 1, 1])));
+      // Send positive response
+      session.send(
+        result instanceof Response
+          ? result
+          : new Response(`Recipient <${recipient}> ok`, 250, [2, 1, 5])
+      );
+    })
+    .catch((err) =>
+      session.send(
+        err instanceof Response ? err : new Response(null, 451, [4, 1, 1])
+      )
+    );
 }

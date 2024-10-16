@@ -6,9 +6,9 @@ import Response from './Response.js';
 export default class Session {
   constructor(socket) {
     this.socket = socket;
-    this.clientIP = socket.remoteAddress.startsWith('::ffff:') ?
-        socket.remoteAddress.slice(7):
-        socket.remoteAddress;
+    this.clientIP = socket.remoteAddress.startsWith('::ffff:')
+      ? socket.remoteAddress.slice(7)
+      : socket.remoteAddress;
     this.greeting = os.hostname();
     this.id = crypto.randomBytes(8).toString('hex');
     this.rDNS = null;
@@ -21,14 +21,14 @@ export default class Session {
 
     // Define session states
     this.states = {
-      NEW: 'NEW',                     // Just connected
+      NEW: 'NEW', // Just connected
       EHLO_RECEIVED: 'EHLO_RECEIVED', // EHLO completed
-      STARTTLS: 'STARTTLS',           // STARTTLS completed
-      MAIL_FROM: 'MAIL_FROM',         // MAIL FROM received
-      RCPT_TO: 'RCPT_TO',             // RCPT TO received
-      DATA_READY: 'DATA_READY',       // Data received
-      DATA_DONE: 'DATA_DONE',         // Data received
-      QUIT: 'QUIT',                   // Client has quit
+      STARTTLS: 'STARTTLS', // STARTTLS completed
+      MAIL_FROM: 'MAIL_FROM', // MAIL FROM received
+      RCPT_TO: 'RCPT_TO', // RCPT TO received
+      DATA_READY: 'DATA_READY', // Data received
+      DATA_DONE: 'DATA_DONE', // Data received
+      QUIT: 'QUIT', // Client has quit
     };
 
     this.state = this.states.NEW; // Start with the NEW state
@@ -56,7 +56,6 @@ export default class Session {
     }
     Logger.debug(`S: ${output}`, this.id);
     this.socket.write(`${output}\r\n`);
-
   }
 
   // State transition helper
@@ -72,7 +71,6 @@ export default class Session {
         if (this.state === state) return true;
       }
       return false;
-    } else
-      return this.state === expectedState;
+    } else return this.state === expectedState;
   }
 }

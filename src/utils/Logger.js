@@ -4,15 +4,15 @@ const levels = {
   DEBUG: 'DEBUG',
   INFO: 'INFO',
   WARN: 'WARN',
-  ERROR: 'ERROR'
+  ERROR: 'ERROR',
 };
 
 const colors = {
   DEBUG: '\x1b[36m', // Cyan
-  INFO: '\x1b[32m',  // Green
-  WARN: '\x1b[33m',  // Yellow
+  INFO: '\x1b[32m', // Green
+  WARN: '\x1b[33m', // Yellow
   ERROR: '\x1b[31m', // Red
-  RESET: '\x1b[0m'   // Reset color
+  RESET: '\x1b[0m', // Reset color
 };
 
 class Logger {
@@ -37,7 +37,6 @@ class Logger {
 
     const time = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     const session = sessionID ? ` <${sessionID}> ` : ' ';
-
 
     return `${colors[level]}[${level}]${colors.RESET} ${' '.repeat(5 - level.length)}[${time}]${session}${message}`;
   }
@@ -70,7 +69,7 @@ class Logger {
       [levels.DEBUG]: 1,
       [levels.INFO]: 2,
       [levels.WARN]: 3,
-      [levels.ERROR]: 4
+      [levels.ERROR]: 4,
     };
 
     return levelPriority[level] >= levelPriority[this.level];

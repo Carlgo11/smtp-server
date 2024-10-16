@@ -2,11 +2,11 @@ import tls from 'tls';
 import Logger from '../utils/Logger.js';
 import context from './ServerContext.js';
 import events from './Event.js';
-import {handleCommand} from '../commands/CommandHandler.js';
+import { handleCommand } from '../commands/CommandHandler.js';
 
 export function handleTLSConnection(session) {
   // Create a new TLS socket from the existing socket
-  const {tlsOptions} = context;
+  const { tlsOptions } = context;
 
   const tlsSocket = new tls.TLSSocket(session.socket, {
     isServer: true,
@@ -40,15 +40,14 @@ export function handleTLSConnection(session) {
 
   // Process commands sequentially from the command queue
   async function processCommandQueue() {
-    if (processing) return;  // Exit if another command is being processed
-    processing = true;        // Mark processing state
+    if (processing) return; // Exit if another command is being processed
+    processing = true; // Mark processing state
 
     while (commandQueue.length > 0) {
       const command = commandQueue.shift().trim(); // Dequeue the next command
 
       // Skip empty lines (possible with consecutive CRLF)
-      if (command.length === 0)
-        continue;
+      if (command.length === 0) continue;
 
       Logger.debug(`C: ${command}`, session.id);
 
@@ -87,10 +86,13 @@ export function handleTLSConnection(session) {
   tlsSocket.on('_tlsError', (err) => {
     switch (err.code) {
       case 'ERR_SSL_UNSUPPORTED_PROTOCOL':
-        Logger.warn(`No shared TLS versions`, session.id);
+        Logger.warn(
+          `No shared TLS versions (Client wants ${tlsSocket.getProtocol()})`,
+          session.id
+        );
         break;
       case 'ERR_SSL_NO_SHARED_CIPHER':
-        Logger.warn(`No shared TLS ciphers`, session.id);
+        Logger.warn('No shared TLS ciphers.', session.id);
         break;
       default:
         Logger.warn(err.message, session.id);
@@ -99,23 +101,22 @@ export function handleTLSConnection(session) {
   });
 
   tlsSocket.on('secure', () => {
-
     // Replace the plain socket with the secure TLS socket
     session.socket = tlsSocket;
+
+    const protocol = tlsSocket.getProtocol();
+    const cipher = tlsSocket.getCipher().standardName;
 
     // Set TLS connection data
     session.tls = {
       enabled: true,
-      version: tlsSocket.getProtocol(),  // Get the TLS protocol version
-      cipher: tlsSocket.getCipher().standardName,     // Get the cipher info (now it will be defined)
-      authorized: tlsSocket.getPeerCertificate() || false,  // Check if the connection is authorized
+      version: protocol, // Get the TLS protocol version
+      cipher, // Get the cipher info (now it will be defined)
     };
 
-    Logger.info(
-        `Connection upgraded to ${tlsSocket.getProtocol()} (${tlsSocket.getCipher().standardName})`,
-        session.id);
+    Logger.info(`Connection upgraded to ${protocol} (${cipher})`, session.id);
     events.emit('SECURE');
-    context.onSecure(session).then(r => r);
+    context.onSecure(session).then((r) => r);
   });
 
   tlsSocket.on('terminate', () => {

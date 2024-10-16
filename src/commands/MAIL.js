@@ -4,9 +4,11 @@ import events from '../core/Event.js';
 
 export default async function MAIL(args, session) {
   if (session.state !== session.states.STARTTLS)
-    return session.send(session.tls ?
-        new Response(null, 501, [5, 5, 1]):
-        new Response('Must issue a STARTTLS command first.', 530, [5, 7, 0]));
+    return session.send(
+      session.tls
+        ? new Response(null, 501, [5, 5, 1])
+        : new Response('Must issue a STARTTLS command first.', 530, [5, 7, 0])
+    );
 
   // Validate command is MAIL FROM:
   if (!args[0].toUpperCase().startsWith('FROM:'))
@@ -27,19 +29,24 @@ export default async function MAIL(args, session) {
   const [_, ...extensions] = args;
 
   // Wait on external validation
-  context.onMAILFROM(sender, session, extensions).then(result => {
+  context
+    .onMAILFROM(sender, session, extensions)
+    .then((result) => {
+      // Save the sender's address in the session
+      session.mailFrom = sender;
 
-    // Save the sender's address in the session
-    session.mailFrom = sender;
+      // Transition to MAIL_FROM state
+      session.transitionTo(session.states.MAIL_FROM);
 
-    // Transition to MAIL_FROM state
-    session.transitionTo(session.states.MAIL_FROM);
-
-    session.send(result instanceof Response ?
-        result:
-        new Response(`Originator <${sender}> ok`, 250, [2, 1, 0]));
-  }).catch(err => session.send(err instanceof Response ?
-      err:
-      new Response(null, 451, [4, 3, 0])),
-  );
+      session.send(
+        result instanceof Response
+          ? result
+          : new Response(`Originator <${sender}> ok`, 250, [2, 1, 0])
+      );
+    })
+    .catch((err) =>
+      session.send(
+        err instanceof Response ? err : new Response(null, 451, [4, 3, 0])
+      )
+    );
 }

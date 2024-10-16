@@ -8,16 +8,12 @@ export function registerCommand(command, handler) {
   commandHandlers[command.toUpperCase()] = handler;
 }
 
-export function clearCommands() {
-  commandHandlers = {};
-}
-
 export async function handleCommand(message, session) {
   const command = message.split(' ')[0].toUpperCase();
   const args = message.substring(command.length + 1).split(' ');
   const handler = commandHandlers[command];
   if (handler) {
-    await handler(args, session)
+    await handler(args, session);
   } else {
     session.unknownCommands += 1;
     if (session.unknownCommands < context.maxUnknownCommands) {

@@ -3,7 +3,7 @@ import Session from '../models/Session.js';
 import _Response from '../models/Response.js';
 import Logger from '../utils/Logger.js';
 import reverseDNS from '../utils/reverseDNS.js';
-import {handleCommand, registerCommand} from '../commands/CommandHandler.js';
+import { handleCommand, registerCommand } from '../commands/CommandHandler.js';
 import context from './ServerContext.js';
 import events from './Event.js';
 
@@ -36,8 +36,8 @@ export function startSMTPServer(options = {}) {
     // Add session to active sessions
     activeSessions.add(session);
     session.rDNS = await reverseDNS(session.clientIP);
-    Logger.setLevel(context.logLevel)
-    const rDNS = `<${session.rDNS}>`
+    Logger.setLevel(context.logLevel);
+    const rDNS = `<${session.rDNS}>`;
     Logger.info(`${session.clientIP} connected ${rDNS}`, session.id);
 
     events.emit('CONNECT', session);
@@ -53,8 +53,7 @@ export function startSMTPServer(options = {}) {
 
       if (data.length > 512)
         session.send(new Response('Line too long', 500, [5, 5, 2]));
-      else
-        handleCommand(message, session);
+      else handleCommand(message, session);
     });
 
     socket.on('end', () => {
@@ -64,8 +63,10 @@ export function startSMTPServer(options = {}) {
     });
 
     socket.on('error', (err) => {
-      Logger.error(`Error occurred with ${session.clientIP}: ${err.message}`,
-          session.id);
+      Logger.error(
+        `Error occurred with ${session.clientIP}: ${err.message}`,
+        session.id
+      );
       activeSessions.delete(session);
     });
   });

@@ -29,11 +29,15 @@ export default class Response {
 
   toString(eStatusCodes = true) {
     const eStatus = this.enhancedStatus.join('.');
-    return `${this.basicStatus}${eStatusCodes ? ` ${eStatus}`: ''} ${this.message}`;
+    return `${this.basicStatus}${
+      eStatusCodes ? ` ${eStatus}` : ''
+    } ${this.message}`;
   }
 
   fetchMessage(enhancedStatus) {
-    return statuses[enhancedStatus.join('.')] ||
-        statuses[enhancedStatus.slice(1).join('.')];
+    return (
+      statuses[enhancedStatus.join('.')] ||
+      statuses[enhancedStatus.slice(1).join('.')]
+    );
   }
 }

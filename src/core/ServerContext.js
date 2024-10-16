@@ -1,4 +1,4 @@
-import {hostname} from 'os';
+import { hostname } from 'os';
 
 class ServerContext {
   constructor() {
@@ -22,8 +22,8 @@ class ServerContext {
 
   // Method to set options, allowing for overrides by the implementing project
   setOptions(options = {}) {
-    Object.assign(this, options)
-   }
+    Object.assign(this, options);
+  }
 }
 
 // Export a singleton instance of the context

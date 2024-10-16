@@ -36,7 +36,7 @@ export default async function DATA(_, session) {
 
     // Transition to DATA_DONE state after processing is complete
     session.transitionTo(
-        result ? session.states.DATA_DONE:session.states.RCPT_TO,
+      result ? session.states.DATA_DONE : session.states.RCPT_TO
     );
   };
 
@@ -47,16 +47,19 @@ export default async function DATA(_, session) {
    */
   const handleDataComplete = (messageData) => {
     // Pass the message data to the consumer's onDATA handler
-    context.onDATA(messageData, session).then((result) => {
-      if (result instanceof Response) session.send(result);
-      else session.send('Message accepted', [250, 2, 6, 0]);
+    context
+      .onDATA(messageData, session)
+      .then((result) => {
+        if (result instanceof Response) session.send(result);
+        else session.send('Message accepted', [250, 2, 6, 0]);
 
-      cleanup(true);
-    }).catch((result) => {
-      if (result instanceof Response) session.send(result);
-      else session.send(`${result || 'Message rejected'}`, [550, 5, 1, 0]);
-      cleanup(false);
-    });
+        cleanup(true);
+      })
+      .catch((result) => {
+        if (result instanceof Response) session.send(result);
+        else session.send(`${result || 'Message rejected'}`, [550, 5, 1, 0]);
+        cleanup(false);
+      });
   };
 
   /**
@@ -71,8 +74,9 @@ export default async function DATA(_, session) {
     // Check for maximum message size
     if (dataBuffer.length > MAX_MESSAGE_SIZE) {
       session.send(
-          'Message size exceeds fixed maximum message size',
-          [552, 5, 3, 4]);
+        'Message size exceeds fixed maximum message size',
+        [552, 5, 3, 4]
+      );
       cleanup(false);
       return;
     }
