@@ -1,16 +1,17 @@
-import os from 'os';
-import * as crypto from 'node:crypto';
+import {randomBytes} from 'node:crypto';
 import Logger from '../utils/Logger.js';
 import Response from './Response.js';
 
+/**
+ * SMTP Session object
+ */
 export default class Session {
   constructor(socket) {
     this.socket = socket;
     this.clientIP = socket.remoteAddress.startsWith('::ffff:')
       ? socket.remoteAddress.slice(7)
       : socket.remoteAddress;
-    this.greeting = os.hostname();
-    this.id = crypto.randomBytes(8).toString('hex');
+    this.id = randomBytes(8).toString('hex');
     this.rDNS = null;
     this.utf8 = false;
     this.ehlo = null;
@@ -35,42 +36,35 @@ export default class Session {
   }
 
   /**
+   * Send a message to the client
    *
-   * @param {String|Error|Response} message
-   * @param code {Number|Array}
+   * @param {String|Error|Response} message - Message to send
+   * @param code {Number|Array|undefined} - Status code(s)
    */
   send(message, code = undefined) {
     let output = '';
-    if (message instanceof Response) {
+    if (message instanceof Response)
       output = message.toString(this.tls);
-    } else if (message instanceof Error) {
+    else if (message instanceof Error)
       output = `${message.responseCode} ${message.message}`;
-    } else if (code === undefined) {
+    else if (code === undefined)
       output = message;
-    } else if (code instanceof Array) {
-      const basic = code.shift();
-      const enhanced = code.join('.');
-      output = `${basic} ${enhanced} ${message}`;
-    } else if (Number.isInteger(code)) {
+    else if (code instanceof Array)
+      output = `${code.shift()} ${code.join('.')} ${message}`;
+    else if (Number.isInteger(code))
       output = `${code} ${message}`;
-    }
+
     Logger.debug(`S: ${output}`, this.id);
     this.socket.write(`${output}\r\n`);
   }
 
-  // State transition helper
+  /**
+   * Transition to a new session state
+   *
+   * @param {String} newState - New state to transition to
+   */
   transitionTo(newState) {
     Logger.debug(`Session transitioned to ${newState}`, this.id);
     this.state = newState;
-  }
-
-  // State validation helper
-  isValidTransition(expectedState) {
-    if (expectedState instanceof Array) {
-      for (const state of expectedState) {
-        if (this.state === state) return true;
-      }
-      return false;
-    } else return this.state === expectedState;
   }
 }

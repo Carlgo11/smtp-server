@@ -4,6 +4,11 @@ import context from './ServerContext.js';
 import events from './Event.js';
 import { handleCommand } from '../commands/CommandHandler.js';
 
+/**
+ * Set up TLS connection with socket
+ *
+ * @param {Session} session - Session to upgrade to TLS
+ */
 export function handleTLSConnection(session) {
   // Create a new TLS socket from the existing socket
   const { tlsOptions } = context;

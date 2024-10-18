@@ -1,6 +1,5 @@
 import net from 'net';
 import Session from '../models/Session.js';
-import _Response from '../models/Response.js';
 import Logger from '../utils/Logger.js';
 import reverseDNS from '../utils/reverseDNS.js';
 import { handleCommand, registerCommand } from '../commands/CommandHandler.js';
@@ -24,6 +23,12 @@ registerCommand('RCPT', RCPT);
 registerCommand('DATA', DATA);
 registerCommand('QUIT', QUIT);
 
+/**
+ * Create SMTP server
+ *
+ * @param {Object} options - Settings passed on
+ * @returns {Server} - Returns Net Server.
+ */
 export function startSMTPServer(options = {}) {
   // Create a shared context for all configurations and handlers
   context.setOptions(options);
@@ -40,11 +45,11 @@ export function startSMTPServer(options = {}) {
     const rDNS = `<${session.rDNS}>`;
     Logger.info(`${session.clientIP} connected ${rDNS}`, session.id);
 
+    // Greet the client
+    session.send(`${context.greeting} ESMTP`, 220);
+
     events.emit('CONNECT', session);
     await context.onConnect(session);
-
-    // Greet the client
-    session.send(`${session.greeting} ESMTP`, 220);
 
     // Handle incoming data
     socket.on('data', (data) => {
@@ -74,9 +79,8 @@ export function startSMTPServer(options = {}) {
   // Handle termination signals outside the connection handler
   const handleTermination = () => {
     Logger.info('Server is shutting down...');
-    server.close(() => {
-      Logger.info('Server closed, no longer accepting connections.');
-    });
+    server.close(
+      () => Logger.info('Server closed, no longer accepting connections.'));
 
     // Gracefully close all active sessions
     for (const session of activeSessions) {
@@ -92,6 +96,6 @@ export function startSMTPServer(options = {}) {
   return server; // Return the server instance for further use
 }
 
-export const Response = _Response;
-export const Listen = events;
-export const Log = Logger;
+export Response from '../models/Response.js';
+export Listen from './Event.js';
+export Log from '../utils/Logger.js';
