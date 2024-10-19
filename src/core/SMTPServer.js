@@ -46,11 +46,16 @@ export default function startSMTPServer(options = {}) {
     const rDNS = `<${session.rDNS}>`;
     Log.info(`${session.clientIP} connected ${rDNS}`, session.id);
 
-    // Greet the client
-    session.send(`${context.greeting} ESMTP`, 220);
-
     Listen.emit('CONNECT', session);
-    await context.onConnect(session);
+    context.onConnect(session).then(() => {
+      // Greet the client
+      session.send(`${context.greeting} ESMTP`, 220);
+    }).catch((err) => {
+      if (err instanceof Response)
+        socket.write(`${err.toString()}\r\n`, () => socket.end());
+      else
+        socket.write('421 Connection refused\r\n', () => socket.end());
+    });
 
     // Handle incoming data
     socket.on('data', (data) => {
