@@ -1,6 +1,6 @@
 {
   "name": "@carlgo11/smtp-server",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Simple lightweight SMTP server written in Node.js",
   "main": "src/index.js",
   "scripts": {

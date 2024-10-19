@@ -50,10 +50,10 @@ To integrate this SMTP server into your project, you can start the server and li
 
 ### **Example**
 ```js
-import SMTPServer from '@carlgo11/smtp-server';
+import {Server, Response} from '@carlgo11/smtp-server';
 
 // Create server instance
-const server = new SMTPServer({
+const server = new Server({
   tlsOptions: {
     key: 'key.pem',
     cert: 'cert.pem',
@@ -87,16 +87,16 @@ Hooks (callbacks) offer you to intervene during an event (such as EHLO) and pass
 The downside to this is that the server will freeze the conversation with the client until your code returns.
 All hooks support Promises (async/await).
 
-| Hook Name      | Arguments        | Description                                              |
-|----------------|------------------|----------------------------------------------------------|
-| `onConnect`    | session          | Triggered when a client connects to the server.          |
-| `onDisconnect` | session          | Triggered when a client disconnects from the server.     |
-| `onEHLO`       | address, session | Triggered when the server receives the `EHLO` command.   |
-| `onSecure`     | session          | Triggered when a client initiates a STARTTLS connection. |
-| `onMAILFROM`   | address, session | Triggered when the `MAIL FROM` command is issued.        |
-| `onRCPTTO`     | address, session | Triggered when the `RCPT TO` command is issued.          |
-| `onDATA`       | message, session | Triggered when the `DATA` phase begins.                  |
-|
+| Hook Name      | Arguments                    | Description                                                       |
+|----------------|------------------------------|-------------------------------------------------------------------|
+| `onConnect`    | session                      | Triggered when a client connects to the server.                   |
+| `onDisconnect` | session                      | Triggered when a client disconnects from the server.              |
+| `onEHLO`       | address, session             | Triggered when the server receives the `EHLO` command.            |
+| `onSecure`     | session                      | Triggered when a client initiates a STARTTLS connection.          |
+| `onMAILFROM`   | sender, session, esmtpParams | Triggered when the `MAIL FROM` command is issued.                 |
+| `onRCPTTO`     | recipient, session           | Triggered when the `RCPT TO` command is issued.                   |
+| `onDATA`       | messageData, session         | Triggered when the client has sent the entire email message (IMF) |
+
 #### **Handling Connections with Hooks**
 
 Here's a basic example of handling an incoming email:
@@ -127,21 +127,20 @@ server.onRCPTTO(async (address, session) => {
 Using events allows you to parse session events without freezing the client-server conversation.
 This is useful if you don't expect to reject a message, but just parse and store it.
 
-| Event Name   | Arguments          | Description                                        |
-|--------------|--------------------|----------------------------------------------------|
-| `connect`    | session            | Emitted when a client connects.                    |
-| `disconnect` | session            | Emitted when a client disconnects.                 | 
-| `secure`     | session            | Emitted when a STARTTLS connection is established. |
-| `command`    | session, message   | Emitted for every incoming command.                |
-| `EHLO`       | session, domain    | Emitted when `EHLO` command is received.           |
-| `MAIL`       | session, address   | Emitted when `MAIL FROM` command is received.      |
-| `RCPT`       | session, address   | Emitted when `RCPT TO` command is received.        |
-| `dataChunk`  | dataChunk, session | Emitted when the message data is received.         |
+| Event Name   | Arguments        | Description                                        |
+|--------------|------------------|----------------------------------------------------|
+| `CONNECT`    | session          | Emitted when a client connects.                    |
+| `DISCONNECT` | session          | Emitted when a client disconnects.                 | 
+| `SECURE`     | session          | Emitted when a STARTTLS connection is established. |
+| `EHLO`       | session, domain  | Emitted when `EHLO` command is received.           |
+| `MAIL`       | session, address | Emitted when `MAIL FROM` command is received.      |
+| `RCPT`       | session, address | Emitted when `RCPT TO` command is received.        |
+| `DATA`       | session, message | Emitted when an IMF data chunk is received.        |
 
 #### **Handling Connections with Events**
 
 ```js
-server.on('connect', (session) => {
+server.on('CONNECT', (session) => {
   console.log(`${session.clientIP} connected.`);
 });
 
@@ -161,7 +160,31 @@ The server supports customization by passing options directly to the server cons
 
 ## **Logging**
 
-By default, the server provides basic logging of connections, disconnections, and commands received. You can enhance the logging by listening to events and writing custom log handlers.
+By default, the server provides basic logging of connections, disconnections, and commands received.
+You can specify the intensity of the logs by changing the log level.
+The following log levels are provided:
+* DEBUG
+* INFO
+* WARN
+* ERROR
+
+The log level is specified when implementing the Server object.
+```js
+const server = new Server({
+   logLevel: 'DEBUG',
+}) 
+```
+
+If you wish to disable logging completely, set `logLevel` to `'NONE'`.
+
+You can also send your own strings to log by implementing the `Logger` from the project.
+```js
+import {Logger} from '@carlgo11/smtp-server';
+
+Logger.info('This message is sent as an INFO message.');
+
+Logger.debug('And this message is sent as a DEBUG message.');
+```
 
 ## **Contributing**
 
