@@ -11,6 +11,8 @@ export default function isValidEHLO(ehloValue) {
   if (ehloValue.startsWith('[') && ehloValue.endsWith(']')) {
     const ip = ehloValue.slice(1, -1); // Remove the brackets
     return isIPv4(ip) || isIPv6(ip); // Check if it's a valid IPv4 or IPv6
+  } else {
+    if (isIPv4(ehloValue) || isIPv6(ehloValue)) return false;
   }
 
   // Check if it's a valid domain
