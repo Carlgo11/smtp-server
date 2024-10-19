@@ -30,7 +30,7 @@ registerCommand('QUIT', QUIT);
  * @param {Object} options - Settings passed on
  * @returns {Server} - Returns Net Server.
  */
-function startSMTPServer(options = {}) {
+export default function startSMTPServer(options = {}) {
   // Create a shared context for all configurations and handlers
   context.setOptions(options);
 
@@ -96,5 +96,3 @@ function startSMTPServer(options = {}) {
 
   return server; // Return the server instance for further use
 }
-
-export { startSMTPServer, Response, Listen, Log };
