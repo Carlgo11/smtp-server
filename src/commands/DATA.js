@@ -21,7 +21,7 @@ export default async function DATA(_, session) {
   const resetTimeout = () => {
     clearTimeout(dataTimeout);
     dataTimeout = setTimeout(() => {
-      session.send('Requested action aborted: timeout', [451, 4, 4, 2]);
+      session.send(new Response('Requested action aborted: timeout', 451, [4, 4, 2]));
       cleanup(false);
       session.socket.end();
     }, DATA_TIMEOUT);
@@ -51,13 +51,13 @@ export default async function DATA(_, session) {
       .onDATA(messageData, session)
       .then((result) => {
         if (result instanceof Response) session.send(result);
-        else session.send('Message accepted', [250, 2, 6, 0]);
+        else session.send(new Response('Message accepted', 250, [2, 6, 0]));
 
         cleanup(true);
       })
       .catch((result) => {
         if (result instanceof Response) session.send(result);
-        else session.send(`${result || 'Message rejected'}`, [550, 5, 1, 0]);
+        else session.send(new Response(`${result || 'Message rejected'}`, 550, [5, 1, 0]));
         cleanup(false);
       });
   };
@@ -96,11 +96,11 @@ export default async function DATA(_, session) {
 
   // Ensure the state allows the transition to DATA
   if (session.state !== session.states.RCPT_TO)
-    return session.send('Bad sequence of commands', [503, 5, 5, 1]);
+    return session.send(new Response('Bad sequence of commands', 503, [5, 5, 1]));
 
   // Transition to DATA_READY state and prompt client to start sending data
   session.transitionTo(session.states.DATA_READY);
-  session.send('Start mail input; end with <CRLF>.<CRLF>', [354, 2, 0, 0]);
+  session.send(new Response('Start mail input; end with <CRLF>.<CRLF>', 354, [2, 0, 0]));
 
   // Start the data reception timeout
   resetTimeout();

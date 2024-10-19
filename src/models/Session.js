@@ -1,4 +1,4 @@
-import {randomBytes} from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import Logger from '../utils/Logger.js';
 import Response from './Response.js';
 
@@ -10,7 +10,7 @@ export default class Session {
     this.socket = socket;
     this.clientIP = socket.remoteAddress.startsWith('::ffff:')
       ? socket.remoteAddress.slice(7)
-      : socket.remoteAddress;
+      :socket.remoteAddress;
     this.id = randomBytes(8).toString('hex');
     this.rDNS = null;
     this.utf8 = false;
@@ -19,6 +19,7 @@ export default class Session {
     this.mailFrom = null;
     this.rcptTo = [];
     this.tls = false; // TLS session info placeholder
+    this.estatus = false;
 
     // Define session states
     this.states = {
@@ -29,7 +30,6 @@ export default class Session {
       RCPT_TO: 'RCPT_TO', // RCPT TO received
       DATA_READY: 'DATA_READY', // Data received
       DATA_DONE: 'DATA_DONE', // Data received
-      QUIT: 'QUIT', // Client has quit
     };
 
     this.state = this.states.NEW; // Start with the NEW state
@@ -38,19 +38,15 @@ export default class Session {
   /**
    * Send a message to the client
    *
-   * @param {String|Error|Response} message - Message to send
-   * @param code {Number|Array|undefined} - Status code(s)
+   * @param {String|Response} message - Message to send
+   * @param code {Number|undefined} - Status code
    */
   send(message, code = undefined) {
     let output = '';
     if (message instanceof Response)
-      output = message.toString(this.tls);
-    else if (message instanceof Error)
-      output = `${message.responseCode} ${message.message}`;
+      output = message.toString(this.estatus);
     else if (code === undefined)
       output = message;
-    else if (code instanceof Array)
-      output = `${code.shift()} ${code.join('.')} ${message}`;
     else if (Number.isInteger(code))
       output = `${code} ${message}`;
 

@@ -29,9 +29,9 @@ export default function EHLO(args, session) {
       extensions.forEach((extension) =>
         session.send(`250-${extension.toUpperCase()}`),
       );
-      session.send(`SIZE ${context.maxMessageSize}`, 250);
+      session.send(`250 SIZE ${context.maxMessageSize}`);
     } else {
-      session.send('STARTTLS', 250);
+      session.send('250 STARTTLS');
       session.transitionTo(session.states.EHLO_RECEIVED);
     }
   }).catch((err) =>

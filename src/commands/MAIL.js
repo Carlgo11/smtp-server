@@ -15,7 +15,7 @@ export default async function MAIL(args, session) {
       return session.send(
         session.tls
           ? new Response(null, 501, [5, 5, 1])
-          :new Response('Must issue a STARTTLS command first.', 530, [5, 7, 0]),
+          : new Response('Must issue a STARTTLS command first.', 530, [5, 7, 0]),
       );
 
     const commandString = args.join(' ');
@@ -36,7 +36,7 @@ export default async function MAIL(args, session) {
     session.send(
       result instanceof Response
         ? result
-        :new Response(`Originator <${sender}> ok`, 250, [2, 1, 0]),
+        : new Response(`Originator <${sender}> ok`, 250, [2, 1, 0]),
     );
   } catch (err) {
     session.send(
