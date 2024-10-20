@@ -25,10 +25,13 @@ registerCommand('DATA', DATA);
 registerCommand('QUIT', QUIT);
 
 /**
- * Create SMTP server
+ * Create an SMTP server
  *
+ * @extends net.Server
  * @param {Object} options - Settings passed on
  * @returns {Server} - Returns Net Server.
+ * @class SMTPServer
+ * @module SMTPServer
  */
 export default function startSMTPServer(options = {}) {
   // Create a shared context for all configurations and handlers
@@ -46,6 +49,12 @@ export default function startSMTPServer(options = {}) {
     const rDNS = `<${session.rDNS}>`;
     Log.info(`${session.clientIP} connected ${rDNS}`, session.id);
 
+    /**
+     * New SMTP connection established.
+     *
+     * @event CONNECT
+     * @param {Session} session - The session object of the connecting client.
+     */
     Listen.emit('CONNECT', session);
     context.onConnect(session).then(() => {
       // Greet the client

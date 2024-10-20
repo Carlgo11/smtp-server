@@ -7,6 +7,8 @@ import events from '../core/Event.js';
  *
  * @param {string[]} args - Arguments provided with the MAIL command.
  * @param {object} session - The SMTP session object.
+ * @module MAIL
+ * @async
  * @returns {Promise<void>}
  */
 export default async function MAIL(args, session) {
@@ -23,6 +25,14 @@ export default async function MAIL(args, session) {
 
     validateSMTPUTF8(sender, esmtpParams);
 
+    /**
+     * MAIL FROM: command sent
+     *
+     * @event MAIL
+     * @param {Session} session - Current session
+     * @param {String} sender - Address of the email sender
+     * @param {Object} esmtpParams - ESMTP extensions declared as parameters in the MAIL FROM command.
+     */
     events.emit('MAIL', session, sender, esmtpParams);
 
     // Wait on external validation
@@ -75,6 +85,8 @@ async function parseMailFromCommand(command) {
  * @param {string} address - Email address enclosed in angle brackets.
  * @returns {string|null} - Validated email address or null if empty.
  * @throws {Response} - Throws an error response if the address is invalid.
+ * @function validateAddress
+ * @returns {void}
  */
 function validateAddress(address) {
   if (!address.startsWith('<') || !address.endsWith('>')) {
@@ -102,6 +114,7 @@ function validateAddress(address) {
  * @param {string} paramsString - String containing ESMTP parameters.
  * @returns {object} - Parsed ESMTP parameters.
  * @throws {Response} - Throws an error response if parameters are invalid.
+ * @module MAIL
  */
 async function parseESMTPParameters(paramsString) {
   const params = {};

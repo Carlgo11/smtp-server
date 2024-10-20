@@ -73,10 +73,9 @@ export default async function DATA(_, session) {
 
     // Check for maximum message size
     if (dataBuffer.length > MAX_MESSAGE_SIZE) {
-      session.send(
+      session.send(new Response(
         'Message size exceeds fixed maximum message size',
-        [552, 5, 3, 4]
-      );
+        552, [5, 3, 4]));
       cleanup(false);
       return;
     }

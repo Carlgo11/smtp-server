@@ -20,6 +20,13 @@ export default async function RCPT(args, session) {
   // Extract the email address
   const recipient = address.slice(1, -1);
 
+  /**
+   * RCPT TO: command sent
+   *
+   * @event RCPT
+   * @param {Session} session - Session sending the command.
+   * @param {String} recipient - Recipient email address.
+   */
   events.emit('RCPT', session, recipient);
 
   return context

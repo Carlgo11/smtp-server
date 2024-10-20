@@ -8,6 +8,7 @@ import { handleCommand } from '../commands/CommandHandler.js';
  * Set up TLS connection with socket
  *
  * @param {Session} session - Session to upgrade to TLS
+ * @module TLSServer
  */
 export function handleTLSConnection(session) {
   // Create a new TLS socket from the existing socket
@@ -26,6 +27,13 @@ export function handleTLSConnection(session) {
   tlsSocket.on('data', async (data) => {
     // If in DATA_READY state, emit the data as message body content
     if (session.state === session.states.DATA_READY)
+      /**
+       * New IMF message data received from client.
+       *
+       * @event DATA
+       * @param {String} data - The message contents.
+       * @param {Session} session - The session sending the data.
+       */
       events.emit('DATA', data, session);
     else {
       // Accumulate data in the buffer for command processing
@@ -120,7 +128,13 @@ export function handleTLSConnection(session) {
     };
 
     Logger.info(`Connection upgraded to ${protocol} (${cipher})`, session.id);
-    events.emit('SECURE');
+    /**
+     * Connection upgraded to TLS socket
+     *
+     * @event SECURE
+     * @param {Session} session - Session being upgraded.
+     */
+    events.emit('SECURE', session);
     context.onSecure(session).then((r) => r);
   });
 

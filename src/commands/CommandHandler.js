@@ -8,6 +8,15 @@ export function registerCommand(command, handler) {
   commandHandlers[command.toUpperCase()] = handler;
 }
 
+/**
+ * Interprets and routes commands.
+ *
+ * @module CommandHandler
+ * @param {String} message - Retrieved message line
+ * @param {Session} session - Session sending the command
+ * @returns {Promise<void>}
+ * @async
+ */
 export async function handleCommand(message, session) {
   const command = message.split(' ')[0].toUpperCase();
   const args = message.substring(command.length + 1).split(' ');

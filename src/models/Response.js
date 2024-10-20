@@ -10,11 +10,16 @@ const statuses = {
 };
 
 /**
- * SMTP Response
+ * Creates an SMTP response message with the given status codes and message.
  *
- * @param String message - Message to send
- * @param int basicStatus - SMTP basic status code
- * @param number[] enhancedStatus - SMTP Enhanced status code
+ * @class Response
+ * @module Response
+ * @param {string} [message] - The response message to be sent to the client.
+ * @param {number} basicStatus - The basic SMTP status code.
+ * @param {number[]} enhancedStatus - Optional enhanced status codes.
+ * @example
+ * const res = new Response('OK', 250, [2, 0, 0]);
+ * session.send(res);
  */
 export default class Response {
   constructor(message, basicStatus = 250, enhancedStatus = [2, 0, 0]) {
@@ -27,6 +32,12 @@ export default class Response {
     this.enhancedStatus = enhancedStatus;
   }
 
+  /**
+   * Export the Response to a formatted string.
+   *
+   * @param {boolean} eStatusCodes - True if enhanced status codes should be included. False if only basic status codes should be used.
+   * @returns {string} Returns formatted string.
+   */
   toString(eStatusCodes = true) {
     const eStatus = this.enhancedStatus.join('.');
     return `${this.basicStatus}${eStatusCodes ?
@@ -34,6 +45,12 @@ export default class Response {
       ''} ${this.message}`;
   }
 
+  /**
+   * Fetch default message for an enhanced status code
+   *
+   * @param {Array} enhancedStatus Enhanced Status Code to fetch default message for.
+   * @returns {String|null} Returns the message if found, otherwise null.
+   */
   fetchMessage(enhancedStatus) {
     return (
       statuses[enhancedStatus.join('.')] ||

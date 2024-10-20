@@ -3,7 +3,15 @@ import Logger from '../utils/Logger.js';
 import Response from './Response.js';
 
 /**
- * SMTP Session object
+ * Represents an SMTP session, handling client interactions and maintaining session state.
+ *
+ * @class Session
+ * @module Session
+ * @param {net.Socket} socket - The socket representing the client connection.
+ * @property {string} id - Unique session ID.
+ * @property {string} clientIP - The IP address of the client.
+ * @property {string} [rDNS] - The reverse DNS lookup result for the client's IP.
+ * @property {string} state - The current state of the SMTP session (e.g., CONNECTED, DATA_READY).
  */
 export default class Session {
   constructor(socket) {

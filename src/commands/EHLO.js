@@ -15,6 +15,13 @@ export default function EHLO(args, session) {
   if (!isValidEHLO(domain))
     return session.send(new Response(null, 501, [5, 5, 2]));
 
+  /**
+   * New EHLO value received from client.
+   *
+   * @event EHLO
+   * @param {Session} session - Session sending the command
+   * @param {String} domain - Value of the EHLO command
+   */
   events.emit('EHLO', session, domain);
 
   // Wait for external validation
