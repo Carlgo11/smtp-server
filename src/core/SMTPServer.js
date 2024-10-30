@@ -14,6 +14,7 @@ import QUIT from '../commands/QUIT.js';
 import MAIL from '../commands/MAIL.js';
 import RCPT from '../commands/RCPT.js';
 import DATA from '../commands/DATA.js';
+import * as events from 'node:events';
 
 const activeSessions = new Set();
 
@@ -59,6 +60,7 @@ export default function startSMTPServer(options = {}) {
     context.onConnect(session).then(() => {
       // Greet the client
       session.send(`${context.greeting} ESMTP`, 220);
+      session.transitionTo(session.states.EHLO_READY);
     }).catch((err) => {
       if (err instanceof Response)
         socket.write(`${err.toString()}\r\n`, () => socket.end());
@@ -68,13 +70,14 @@ export default function startSMTPServer(options = {}) {
 
     // Handle incoming data
     socket.on('data', (data) => {
+      if(session.state === session.states.NEW){
+        Log.warn(`${session.clientIP} talked too soon.`, session.id)
+        session.send('Protocol error: premature data', 554);
+        socket.end();
+      }
+
       const message = data.toString().trim();
       Log.debug(`C: ${message}`, session.id);
-
-      if(data.toString().toUpperCase().includes('HTTP/1')){
-        Log.warn(`${session.clientIP} sent an HTTP command`)
-        return session.socket.end();
-      }
 
       if (data.length > 512)
         session.send(new Response('Line too long', 500, [5, 5, 2]));
