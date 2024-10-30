@@ -71,8 +71,10 @@ export default function startSMTPServer(options = {}) {
       const message = data.toString().trim();
       Log.debug(`C: ${message}`, session.id);
 
-      if(data.toString().toUpperCase().includes('HTTP/1'))
+      if(data.toString().toUpperCase().includes('HTTP/1')){
+        Log.warn(`${session.clientIP} sent an HTTP command`)
         return session.socket.end();
+      }
 
       if (data.length > 512)
         session.send(new Response('Line too long', 500, [5, 5, 2]));
