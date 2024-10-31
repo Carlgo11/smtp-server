@@ -62,6 +62,9 @@ export default function startSMTPServer(options = {}) {
       session.send(`${context.greeting} ESMTP`, 220);
       session.transitionTo(session.states.EHLO_READY);
     }).catch((err) => {
+      // Check if socket is still open
+      if(socket.destroyed) return undefined;
+
       if (err instanceof Response)
         socket.write(`${err.toString()}\r\n`, () => socket.end());
       else
@@ -70,14 +73,14 @@ export default function startSMTPServer(options = {}) {
 
     // Handle incoming data
     socket.on('data', (data) => {
+      const message = data.toString().trim();
+      Log.debug(`C: ${message}`, session.id);
+
       if(session.state === session.states.NEW){
         Log.warn(`${session.clientIP} talked too soon.`, session.id)
         session.send('Protocol error: premature data', 554);
-        socket.end();
+        return socket.end();
       }
-
-      const message = data.toString().trim();
-      Log.debug(`C: ${message}`, session.id);
 
       if (data.length > 512)
         session.send(new Response('Line too long', 500, [5, 5, 2]));
