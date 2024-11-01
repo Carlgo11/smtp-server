@@ -32,7 +32,7 @@ export default class Session {
     // Define session states
     this.states = {
       NEW: 'NEW', // Just connected
-      EHLO_READY: 'EHLO_READY', // Greeting complete. Ready for EHLO
+      GREETING_DONE: 'GREETING_DONE', // Greeting complete
       EHLO_RECEIVED: 'EHLO_RECEIVED', // EHLO completed
       STARTTLS: 'STARTTLS', // STARTTLS completed
       MAIL_FROM: 'MAIL_FROM', // MAIL FROM received

@@ -33,7 +33,7 @@ export async function handleCommand(message, session) {
       }
     } else {
       session.send(new Response('Too many unknown commands.', 421, [4, 7, 0]));
-      session.socket.end();
+      session.socket.destroySoon();
     }
   }
 }

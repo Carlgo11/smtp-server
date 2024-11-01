@@ -14,7 +14,6 @@ import QUIT from '../commands/QUIT.js';
 import MAIL from '../commands/MAIL.js';
 import RCPT from '../commands/RCPT.js';
 import DATA from '../commands/DATA.js';
-import * as events from 'node:events';
 
 const activeSessions = new Set();
 
@@ -57,18 +56,22 @@ export default function startSMTPServer(options = {}) {
      * @param {Session} session - The session object of the connecting client.
      */
     Listen.emit('CONNECT', session);
+
     context.onConnect(session).then(() => {
       // Greet the client
       session.send(`${context.greeting} ESMTP`, 220);
-      session.transitionTo(session.states.EHLO_READY);
+      session.transitionTo(session.states.GREETING_DONE);
     }).catch((err) => {
       // Check if socket is still open
-      if(socket.destroyed) return undefined;
+      if (socket.destroyed || !activeSessions.has(session.id)) return undefined;
+
+      activeSessions.delete(session.id);
 
       if (err instanceof Response)
-        socket.write(`${err.toString()}\r\n`, () => socket.end());
+        socket.write(`${err.toString()}\r\n`, () => socket.destroySoon());
       else
-        socket.write('421 Connection refused\r\n', () => socket.end());
+        socket.write('421 Connection refused\r\n', () => socket.destroySoon());
+      Log.info(`${session.clientIP} disconnected`, session.id);
     });
 
     // Handle incoming data
@@ -79,7 +82,7 @@ export default function startSMTPServer(options = {}) {
       if(session.state === session.states.NEW){
         Log.warn(`${session.clientIP} talked too soon.`, session.id)
         session.send('Protocol error: premature data', 554);
-        return socket.end();
+        return socket.destroySoon();
       }
 
       if (data.length > 512)
@@ -111,7 +114,7 @@ export default function startSMTPServer(options = {}) {
     // Gracefully close all active sessions
     for (const session of activeSessions) {
       session.send(new Response('Server shutting down', 421, [4, 4, 2]));
-      session.socket.end();
+      session.socket.destroySoon();
       activeSessions.delete(session);
     }
   };

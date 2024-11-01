@@ -4,7 +4,7 @@ import Response from '../models/Response.js';
 import isValidEHLO from '../utils/ValidEHLO.js';
 
 export default function EHLO(args, session) {
-  if (session.state !== 'EHLO_READY' && session.state !== 'STARTTLS')
+  if (session.state !== 'GREETING_DONE' && session.state !== 'STARTTLS')
     return session.send(new Response(null, 503, [5, 5, 1]));
 
   if (args.length !== 1)
