@@ -119,6 +119,8 @@ export default function startSMTPServer(options = {}) {
     }
   };
 
+  server.maxConnections = context.maxConnections;
+
   process.on('SIGINT', handleTermination);
   process.on('SIGTERM', handleTermination);
 
