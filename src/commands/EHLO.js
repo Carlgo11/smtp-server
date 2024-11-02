@@ -37,6 +37,7 @@ export default function EHLO(args, session) {
         session.send(`250-${extension.toUpperCase()}`),
       );
       session.send(`250 SIZE ${context.maxMessageSize}`);
+      session.estatus = extensions.includes('ENHANCEDSTATUSCODES');
     } else {
       session.send('250 STARTTLS');
       session.transitionTo(session.states.EHLO_RECEIVED);
