@@ -66,12 +66,12 @@ export default function startSMTPServer(options = {}) {
       if (socket.destroyed || !activeSessions.has(session.id)) return undefined;
 
       activeSessions.delete(session.id);
+      Log.info(`${session.clientIP} disconnected`, session.id);
 
       if (err instanceof Response)
         socket.write(`${err.toString()}\r\n`, () => socket.destroySoon());
       else
         socket.write('421 Connection refused\r\n', () => socket.destroySoon());
-      Log.info(`${session.clientIP} disconnected`, session.id);
     });
 
     // Handle incoming data
@@ -80,7 +80,7 @@ export default function startSMTPServer(options = {}) {
       Log.debug(`C: ${message}`, session.id);
 
       if(session.state === session.states.NEW){
-        Log.warn(`${session.clientIP} talked too soon.`, session.id)
+        Log.warn(`${session.clientIP} talked too soon.`, session.id);
         session.send('Protocol error: premature data', 554);
         return socket.destroySoon();
       }
@@ -99,7 +99,7 @@ export default function startSMTPServer(options = {}) {
     socket.on('error', (err) => {
       Log.error(
         `Error occurred with ${session.clientIP}: ${err.message}`,
-        session.id
+        session.id,
       );
       activeSessions.delete(session);
     });
