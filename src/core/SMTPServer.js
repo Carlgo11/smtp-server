@@ -13,6 +13,7 @@ import STARTTLS from '../commands/STARTTLS.js';
 import QUIT from '../commands/QUIT.js';
 import MAIL from '../commands/MAIL.js';
 import RCPT from '../commands/RCPT.js';
+import RSET from '../commands/RSET.js';
 import DATA from '../commands/DATA.js';
 
 const activeSessions = new Set();
@@ -21,6 +22,7 @@ registerCommand('EHLO', EHLO);
 registerCommand('STARTTLS', STARTTLS);
 registerCommand('MAIL', MAIL);
 registerCommand('RCPT', RCPT);
+registerCommand('RSET', RSET);
 registerCommand('DATA', DATA);
 registerCommand('QUIT', QUIT);
 

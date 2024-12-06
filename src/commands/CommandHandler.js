@@ -2,7 +2,7 @@ import Response from '../models/Response.js';
 import context from '../core/ServerContext.js';
 
 let commandHandlers = {};
-let unhandledCommands = ['HELO', 'RSET', 'VRFY', 'EXPN', 'HELP', 'NOOP'];
+let unhandledCommands = ['HELO', 'VRFY', 'EXPN', 'HELP', 'NOOP'];
 
 export function registerCommand(command, handler) {
   commandHandlers[command.toUpperCase()] = handler;

@@ -42,6 +42,10 @@ export default function EHLO(args, session) {
       session.send('250 STARTTLS');
       session.transitionTo(session.states.EHLO_RECEIVED);
     }
+
+    // Provide last EHLO state for RSET command
+    session.lastEhloState = session.state;
+
   }).catch((err) =>
     session.send(
       err instanceof Response ? err:new Response(null, 451, [4, 3, 0]),

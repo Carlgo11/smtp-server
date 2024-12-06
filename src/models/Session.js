@@ -23,6 +23,7 @@ export default class Session {
     this.rDNS = null;
     this.utf8 = false;
     this.ehlo = null;
+    this.lastEhloState = 'GREETING_DONE';
     this.unknownCommands = 0;
     this.mailFrom = null;
     this.rcptTo = [];
