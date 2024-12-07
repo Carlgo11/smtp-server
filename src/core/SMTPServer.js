@@ -126,6 +126,7 @@ export default function startSMTPServer(options = {}) {
 
   process.on('SIGINT', handleTermination);
   process.on('SIGTERM', handleTermination);
+  process.setMaxListeners(1024);
 
   return server; // Return the server instance for further use
 }
