@@ -79,13 +79,14 @@ server.listen(25, null,() => {
 
 ## **Hooks and Event Flow**
 
-The SMTP server provides several hooks (callbacks) that you can implement to manage different stages of an SMTP session. Each callback corresponds to a specific phase of the email transfer process:
+- **Hooks**: Use when you need to validate, reject, or modify messages at specific stages (e.g., `onMAILFROM`, `onRCPTTO`).
+   - Pros: Granular control, inline validation.
+   - Cons: Freezes session while executing.
+- **Events**: Use for monitoring, logging, or passive processing (e.g., `MAIL`, `DATA`).
+   - Pros: Non-blocking, better for analytics.
+   - Cons: Cannot reject/modify messages.
 
 ### **Hooks**
-
-Hooks (callbacks) offer you to intervene during an event (such as EHLO) and pass or reject a client's request.
-The downside to this is that the server will freeze the conversation with the client until your code returns.
-All hooks support Promises (async/await).
 
 | Hook Name      | Arguments                    | Description                                                       |
 |----------------|------------------------------|-------------------------------------------------------------------|
@@ -123,9 +124,6 @@ server.onRCPTTO(async (address, session) => {
 ```
 
 ### **Events**
-
-Using events allows you to parse session events without freezing the client-server conversation.
-This is useful if you don't expect to reject a message, but just parse and store it.
 
 | Event Name   | Arguments        | Description                                        |
 |--------------|------------------|----------------------------------------------------|

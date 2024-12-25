@@ -9,11 +9,23 @@ import Server from './core/SMTPServer.js';
 import Logger from './utils/Logger.js';
 import Listen from './core/Event.js';
 import Response from './models/Response.js';
-import {registerCommand} from './commands/CommandHandler.js';
+import { registerCommand } from './commands/CommandHandler.js';
+
 /**
  * @exports SMTPServer
  * @exports Response
  * @exports Listen
  * @exports Logger
  */
-export { Server, Response, Listen, Logger , registerCommand};
+export { Server, Response, Listen, Logger, registerCommand };
+
+// Default export as a single object
+const SMTP = {
+  Server,
+  Response,
+  Listen,
+  Logger,
+  registerCommand,
+};
+
+export default SMTP;

@@ -140,7 +140,7 @@ export function handleTLSConnection(session) {
 
   tlsSocket.on('terminate', () => {
     context.onDisconnect(session);
-    session.send('Server shutting down', [421, 4, 4, 2]);
+    session.send(new Response('Server shutting down', 421, [4, 4, 2]));
     tlsSocket.end();
   });
 
