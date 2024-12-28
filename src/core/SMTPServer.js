@@ -79,6 +79,13 @@ export default function startSMTPServer(options = {}) {
     // Handle incoming data
     socket.on('data', (data) => {
       const message = data.toString().trim();
+
+      if(/^[\x00-\x7F]*$/.test(message) === false) {
+        Log.debug(`C: ${data.toString('hex')}`, session.id);
+        Log.warn(`${session.clientIP} sent invalid characters.`, session.id);
+        return session.send('Protocol error: invalid characters', 501);
+      }
+
       Log.debug(`C: ${message}`, session.id);
 
       if(session.state === session.states.NEW){
