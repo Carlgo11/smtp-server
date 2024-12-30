@@ -46,9 +46,13 @@ export default function startSMTPServer(options = {}) {
 
     // Add session to active sessions
     activeSessions.add(session);
-    session.rDNS = await reverseDNS(session.clientIP);
+
+    reverseDNS(session.clientIP, 0).then(ip => {
+      session.rDNS = ip;
+    });
+
     Log.setLevel(context.logLevel);
-    const rDNS = `<${session.rDNS}>`;
+    const rDNS = `<${await reverseDNS(session.clientIP, 1000)}>`;
     Log.info(`${session.clientIP} connected ${rDNS}`, session.id);
 
     /**
