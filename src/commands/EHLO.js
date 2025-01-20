@@ -2,6 +2,7 @@ import context from '../core/ServerContext.js';
 import events from '../core/Event.js';
 import Response from '../models/Response.js';
 import isValidEHLO from '../utils/ValidEHLO.js';
+import logger from '../utils/Logger.js';
 
 export default function EHLO(args, session) {
   if (session.state !== 'GREETING_DONE' && session.state !== 'STARTTLS')
@@ -46,9 +47,11 @@ export default function EHLO(args, session) {
     // Provide last EHLO state for RSET command
     session.lastEhloState = session.state;
 
-  }).catch((err) =>
-    session.send(
-      err instanceof Response ? err:new Response(null, 451, [4, 3, 0]),
-    ),
+  }).catch((err) => {
+      logger.error(err);
+      session.send(
+        err instanceof Response ? err:new Response(null, 451, [4, 3, 0]),
+      );
+    },
   );
 }
