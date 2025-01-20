@@ -56,10 +56,11 @@ export default async function DATA(_, session) {
         cleanup(true);
       })
       .catch((result) => {
-        if (result instanceof Response) session.send(result);
-        else session.send(new Response(`${result || 'Message rejected'}`, 550, [5, 1, 0]));
-        cleanup(false);
-      });
+      session.send(
+        result instanceof Response ? result:new Response(null, 451, [4, 3, 0]),
+      );
+      cleanup(false);
+    });
   };
 
   /**
